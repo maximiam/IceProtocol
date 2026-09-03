@@ -1,20 +1,19 @@
 import { useMemo, useState } from "react";
 import { useApp, useNow } from "../store";
 import { EVENTS } from "../data/skaters";
-import type { Category, Discipline, Protocol, Segment } from "../lib/scoring";
-import { catKey, discKey, fmt, segKey } from "../lib/scoring";
-import { Chip, Reveal, SectionLabel } from "../components/ui";
-import { ProtocolSheet, RulesSheet } from "../components/sheets/InfoSheets";
+import type { Category, Discipline, Segment } from "../lib/scoring";
+import { catKey, discKey, segKey } from "../lib/scoring";
+import { Chip, Reveal } from "../components/ui";
+import { RulesSheet } from "../components/sheets/InfoSheets";
 import { CompSheet, SkaterPickSheet } from "../components/sheets/PickSheets";
 import { IcBook, IcCalendar, IcChevR, IcJudge, IcUsers } from "../components/icons";
 
 const pad = (n: number) => String(Math.max(0, n)).padStart(2, "0");
 
 export function Home() {
-  const { t, lang, draft, protocols, patchDraft, setView, buzz } = useApp();
+  const { t, lang, draft, patchDraft, setView, buzz } = useApp();
   const now = useNow(1000);
   const [rulesOpen, setRulesOpen] = useState(false);
-  const [sel, setSel] = useState<Protocol | null>(null);
   const [compOpen, setCompOpen] = useState(false);
   const [skaterOpen, setSkaterOpen] = useState(false);
   const [group, setGroup] = useState<"m" | "l" | "pairs" | "dance">("m");
@@ -39,9 +38,6 @@ export function Home() {
         .sort((a, b) => a.start.localeCompare(b.start))[0] ?? null,
     [now],
   );
-
-  const allEls = protocols.reduce((s, p) => s + p.elements.length, 0);
-  const avgGoe = allEls ? protocols.reduce((s, p) => s + p.elements.reduce((a, e) => a + e.goe, 0), 0) / allEls : null;
 
   const startTs = next ? +new Date(next.start + "T00:00:00") : 0;
   const live = !!next && now >= startTs;
@@ -213,54 +209,7 @@ export function Home() {
         </button>
       </Reveal>
 
-      {/* stats + recent protocols */}
-      <Reveal delay={60}>
-        <div className="hero-stats" style={{ margin: "18px 0 4px" }}>
-          <div className="hero-stat glass glass-tight" style={{ padding: "12px 12px" }}>
-            <b>{protocols.length}</b>
-            <span>{t("st_protocols")}</span>
-          </div>
-          <div className="hero-stat glass glass-tight" style={{ padding: "12px 12px" }}>
-            <b>{allEls}</b>
-            <span>{t("st_elements")}</span>
-          </div>
-          <div className="hero-stat glass glass-tight" style={{ padding: "12px 12px" }}>
-            <b style={{ color: avgGoe == null ? undefined : avgGoe >= 0 ? "var(--mint)" : "var(--ember)" }}>
-              {avgGoe == null ? "—" : `${avgGoe > 0 ? "+" : ""}${avgGoe.toFixed(1)}`}
-            </b>
-            <span>{t("st_avg_goe")}</span>
-          </div>
-        </div>
-      </Reveal>
-
-      <SectionLabel>{t("recent")}</SectionLabel>
-      {protocols.length === 0 ? (
-        <div className="glass glass-tight">
-          <div className="empty">
-            <IcJudge size={38} />
-            <b>{t("no_recent")}</b>
-            <span>{t("no_recent_sub")}</span>
-          </div>
-        </div>
-      ) : (
-        protocols.slice(0, 4).map((p) => (
-          <div key={p.id} className="list-row glass glass-tight" style={{ cursor: "pointer" }} onClick={() => setSel(p)}>
-            <div className="avatar">{p.skaterFlag || (p.skater || "FS").slice(0, 1).toUpperCase()}</div>
-            <div className="meta">
-              <b>{p.skater || "—"}</b>
-              <span>
-                {t(discKey(p.discipline))} · {t(catKey(p.category ?? "senior"))} ·{" "}
-                {new Date(p.createdAt).toLocaleDateString(loc, { day: "numeric", month: "short" })}
-              </span>
-            </div>
-            <span className="score">{fmt(p.total)}</span>
-            <IcChevR size={15} className="opacity-40" />
-          </div>
-        ))
-      )}
-
       <RulesSheet open={rulesOpen} onClose={() => setRulesOpen(false)} />
-      <ProtocolSheet protocol={sel} onClose={() => setSel(null)} />
       <CompSheet open={compOpen} onClose={() => setCompOpen(false)} />
       <SkaterPickSheet open={skaterOpen} onClose={() => setSkaterOpen(false)} />
     </div>

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useApp } from "../store";
 import { Telegram } from "../lib/telegram";
 import type { Protocol } from "../lib/scoring";
-import { discKey, fmt, segKey } from "../lib/scoring";
+import { catKey, discKey, fmt, segKey } from "../lib/scoring";
 import { Reveal, SectionLabel, Toggle } from "../components/ui";
 import { ProtocolSheet } from "../components/sheets/InfoSheets";
 import { IcChevR, IcJudge, IcTrash } from "../components/icons";
@@ -117,11 +117,14 @@ export function Profile() {
               <div key={p.id} className="list-row glass glass-tight" style={{ cursor: "pointer" }} onClick={() => setSelProto(p)}>
                 <div className="avatar">{p.skaterFlag || (p.skater || "FS").slice(0, 1).toUpperCase()}</div>
                 <div className="meta">
-                  <b>{p.skater || "—"}</b>
+                  <b>{p.skaterFlag ? `${p.skaterFlag} ` : ""}{p.skater || "—"}</b>
                   <span>
-                    {t(discKey(p.discipline))} · {t(segKey(p.discipline, p.segment))} ·{" "}
+                    {t(discKey(p.discipline))} · {t(catKey(p.category ?? "senior"))} · {t(segKey(p.discipline, p.segment))} ·{" "}
                     {new Date(p.createdAt).toLocaleDateString(lang === "ru" ? "ru-RU" : "en-GB", { day: "numeric", month: "short" })}
                   </span>
+                  {p.competition && (
+                    <span style={{ display: "block", color: "var(--gold)", opacity: 0.85 }}>{p.competition}</span>
+                  )}
                 </div>
                 <span className="score">{fmt(p.total)}</span>
                 <button
