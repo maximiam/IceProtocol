@@ -253,6 +253,20 @@ const S = {
   need_country: { ru: "Укажите страну спортсмена", en: "Select the skater's country" },
   rules_structure: { ru: "Структура программ", en: "Program structure" },
   rules_structure_sub: { ru: "Обязательные элементы и время — взрослые и юниоры, все дисциплины", en: "Required content and timing — seniors & juniors, all disciplines" },
+
+  video_title: { ru: "Видеотрансляция", en: "Video stream" },
+  video_sub: { ru: "Трансляция проката оцениваемого фигуриста", en: "Live stream of the skater being judged" },
+  video_none: { ru: "Трансляция не подключена", en: "No stream connected" },
+  video_add_link: { ru: "Добавить ссылку", en: "Add link" },
+  video_upload: { ru: "Загрузить файл", en: "Upload file" },
+  video_link_ph: { ru: "Ссылка на трансляцию (YouTube, mp4…)", en: "Stream link (YouTube, mp4…)" },
+  video_apply: { ru: "Запустить", en: "Start" },
+  video_cancel: { ru: "Отмена", en: "Cancel" },
+  video_change: { ru: "Сменить", en: "Change" },
+  video_live: { ru: "LIVE", en: "LIVE" },
+  video_file: { ru: "Локальный файл", en: "Local file" },
+  video_link: { ru: "Ссылка", en: "Link" },
+  video_invalid: { ru: "Введите ссылку на видео", en: "Enter a video link" },
 } as const;
 
 export type StrKey = keyof typeof S;

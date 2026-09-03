@@ -268,6 +268,53 @@ hr.hair { border: none; border-top: 1px solid var(--glass-border); margin: 14px 
   100% { box-shadow: 0 0 0 2px transparent; }
 }
 
+/* ---------- icon frames (every glyph sits in its own tile) ---------- */
+.icon-frame {
+  display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+  width: 34px; height: 34px; border-radius: 11px; background: var(--glass-2);
+  border: 1px solid var(--glass-border); color: var(--frost);
+}
+.icon-frame.sm { width: 28px; height: 28px; border-radius: 9px; }
+.icon-frame.lg { width: 46px; height: 46px; border-radius: 14px; }
+.icon-frame svg { width: 16px; height: 16px; }
+.icon-frame.lg svg { width: 22px; height: 22px; }
+
+/* ---------- video stream frame ---------- */
+.vframe { padding: 12px 12px 14px; overflow: hidden; }
+.vframe-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.vframe-stage {
+  position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: var(--r-md);
+  overflow: hidden; background: radial-gradient(circle at 50% 30%, #12283d 0%, #060d17 70%);
+  border: 1px solid var(--glass-border-strong);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.04), 0 14px 34px -14px rgba(0,0,0,.65);
+}
+.vframe-media { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border: 0; background: #000; }
+.vframe-empty {
+  position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 6px; text-align: center; padding: 16px 20px; color: var(--mist-dim);
+}
+.vframe-empty b { color: var(--mist); font-size: 13.5px; margin-top: 2px; }
+.vframe-empty span { font-size: 11px; line-height: 1.4; }
+.vframe-btns { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; justify-content: center; }
+.vframe-live {
+  position: absolute; top: 10px; left: 10px; display: flex; align-items: center; gap: 6px;
+  background: rgba(4,10,18,.72); border: 1px solid rgba(255,255,255,.14); color: #fff;
+  padding: 4px 10px; border-radius: 100px; font-size: 10px; font-weight: 800; letter-spacing: .6px;
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 2;
+}
+.vframe-live .rec-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ember); }
+.vframe-live.on .rec-dot { animation: pulse 1s infinite; }
+.vframe-caption {
+  position: absolute; left: 10px; right: 10px; bottom: 10px; display: flex; align-items: center;
+  gap: 7px; background: rgba(4,10,18,.72); border: 1px solid rgba(255,255,255,.14); color: #fff;
+  padding: 7px 11px; border-radius: 12px; font-size: 12px; backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px); pointer-events: none; max-width: calc(100% - 20px); z-index: 2;
+}
+.vframe-comp {
+  margin-left: auto; font-size: 10px; font-weight: 600; color: #cfe9f7; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap; max-width: 45%;
+}
+
 /* ---------- PCS / ranges ---------- */
 .pcs-block { margin-bottom: 18px; }
 .pcs-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2px; }
@@ -544,4 +591,41 @@ main { flex: 1; padding: 0 16px 150px; position: relative; }
 
 @media (min-width: 560px) {
   .tabbar-wrap, .scorebar { padding-left: 0; padding-right: 0; }
+}
+
+/* ============================================================
+   Fluid mobile scaling — adapts 320px → 430px phones
+   ============================================================ */
+.h1 { font-size: clamp(22px, 6.4vw, 28px); }
+.sub { font-size: clamp(12px, 3.5vw, 13.5px); }
+.btn { font-size: clamp(13px, 3.9vw, 14.5px); padding: clamp(12px, 3.6vw, 14px) clamp(16px, 5vw, 20px); }
+.sheet-title { font-size: clamp(16px, 4.8vw, 19px); }
+.tab-btn span { font-size: clamp(8.5px, 2.6vw, 9.5px); }
+.tab-btn svg { width: clamp(17px, 5vw, 19px); height: clamp(17px, 5vw, 19px); }
+.stat-tile b, .stat-strip b, .cd-cell b { font-size: clamp(16px, 5vw, 20px); }
+.flag { font-size: clamp(17px, 5vw, 19px); }
+.score { font-size: clamp(15px, 4.6vw, 18px); }
+
+@media (max-width: 379px) {
+  .topbar { padding: 2px 12px 12px; }
+  .brand-mark { width: 34px; height: 34px; }
+  .brand-text b { font-size: 14.5px; }
+  main { padding: 0 12px 150px; }
+  .glass { border-radius: 18px; }
+  .quick-grid { gap: 8px; }
+  .quick-tile { min-height: 84px; padding: 13px 12px; }
+  .cd-grid { gap: 6px; }
+  .goe-btn { font-size: 11px; }
+  .flag-chip { padding: 7px 10px; font-size: 11.5px; }
+  .stat-grid { gap: 8px; }
+  .stat-tile { padding: 12px 4px; }
+  .profile-avatar { width: 56px; height: 56px; font-size: 19px; }
+}
+
+@media (max-width: 339px) {
+  .tab-btn span { display: none; }
+  .tab-btn { padding: 9px 0; }
+  .tabbar { padding: 6px 4px; }
+  .cd-cell b { font-size: 15px; }
+  .vframe-comp { display: none; }
 }

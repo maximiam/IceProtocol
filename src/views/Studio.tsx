@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useApp } from "../store";
-import type { ElemType, SkElement, Segment } from "../lib/scoring";
+import type { ElemType, SkElement } from "../lib/scoring";
 import {
   catKey,
   categoryOf,
@@ -57,11 +57,11 @@ function PcsSlider({
   );
 }
 import { ScoreBar } from "../components/chrome";
+import { VideoFrame } from "../components/VideoFrame";
 import { PickerSheet } from "../components/sheets/PickerSheet";
 import { GoeSheet } from "../components/sheets/GoeSheet";
 import { ProtocolSheet } from "../components/sheets/InfoSheets";
-import { CompSheet, SkaterPickSheet } from "../components/sheets/PickSheets";
-import { IcCalendar, IcCheck, IcChevR, IcPlus, IcScale, IcTrash, IcUsers } from "../components/icons";
+import { IcPlus, IcScale, IcTrash } from "../components/icons";
 import { findLeveled, LEVEL_KEYS } from "../data/elements";
 
 const TYPE_KEY: Record<ElemType, "jumps" | "type_lift" | "spins" | "steps" | "choreo"> = {
@@ -77,8 +77,6 @@ export function Studio() {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [editEl, setEditEl] = useState<SkElement | null>(null);
   const [saved, setSaved] = useState<ReturnType<typeof saveProtocol> | null>(null);
-  const [compOpen, setCompOpen] = useState(false);
-  const [skaterOpen, setSkaterOpen] = useState(false);
 
   const cat = categoryOf(draft.discipline, draft.category);
   const limits = getLimits(draft.discipline, draft.segment, cat);
@@ -103,11 +101,6 @@ export function Studio() {
     setSaved(p);
   };
 
-  const setSeg = (s: Segment) => {
-    patchDraft({ segment: s });
-    buzz();
-  };
-
   return (
     <div>
       <Reveal>
@@ -121,72 +114,7 @@ export function Studio() {
         </p>
       </Reveal>
 
-      <Reveal delay={40}>
-        <div className="glass" style={{ padding: "14px 15px" }}>
-          <div className="field-label">{t("comp_label")}</div>
-          <button
-            type="button"
-            className="list-row glass glass-tight"
-            style={{ width: "100%", textAlign: "left", marginBottom: 12, padding: "11px 13px" }}
-            onClick={() => {
-              setCompOpen(true);
-              buzz();
-            }}
-          >
-            <span className="qi" style={{ color: "var(--gold)", width: 32, height: 32, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", background: "var(--glass-2)", flexShrink: 0 }}>
-              <IcCalendar size={15} />
-            </span>
-            <div className="meta">
-              <b>{draft.competition || t("comp_pick")}</b>
-              <span>{t("comp_pick_sub")}</span>
-            </div>
-            <IcChevR size={15} className="opacity-40" />
-          </button>
-
-          <div className="field-label">{t("athlete")}</div>
-          <button
-            type="button"
-            className="list-row glass glass-tight"
-            style={{ width: "100%", textAlign: "left", padding: "11px 13px" }}
-            onClick={() => {
-              setSkaterOpen(true);
-              buzz();
-            }}
-          >
-            {draft.athlete ? (
-              <>
-                <span className="flag" style={{ fontSize: 20, flexShrink: 0 }}>{draft.athlete.flag}</span>
-                <div className="meta">
-                  <b>{draft.athlete.name}</b>
-                  <span>{draft.athlete.country}</span>
-                </div>
-              </>
-            ) : (
-              <>
-                <span className="qi" style={{ color: "var(--violet)", width: 32, height: 32, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", background: "var(--glass-2)", flexShrink: 0 }}>
-                  <IcUsers size={15} />
-                </span>
-                <div className="meta">
-                  <b>{t("pick_skater")}</b>
-                  <span>{t("pick_skater_sub")}</span>
-                </div>
-              </>
-            )}
-            <IcChevR size={15} className="opacity-40" />
-          </button>
-
-          <div className="seg-toggle" style={{ marginTop: 12, marginBottom: 0 }}>
-            {(["sp", "fs"] as Segment[]).map((s) => (
-              <button key={s} type="button" className={draft.segment === s ? "active" : ""} onClick={() => setSeg(s)}>
-                {t(segKey(draft.discipline, s))}
-              </button>
-            ))}
-          </div>
-          <div style={{ fontSize: 10.5, color: "var(--mist-dim)", marginTop: 8 }}>
-            {t("cat_note")} · PCS ×{(draft.discipline === "men" || draft.discipline === "jmen" ? (draft.segment === "sp" ? 1.67 : 3.33) : draft.discipline === "dance" ? (draft.segment === "sp" ? 1.33 : 2.0) : draft.segment === "sp" ? 1.33 : 2.67).toFixed(2)}
-          </div>
-        </div>
-      </Reveal>
+      <VideoFrame />
 
       <SectionLabel>{t("elements_title")}</SectionLabel>
 
@@ -355,8 +283,6 @@ export function Studio() {
       <PickerSheet open={pickerOpen} onClose={() => setPickerOpen(false)} discipline={draft.discipline} segment={draft.segment} category={cat} />
       <GoeSheet el={live} onClose={() => setEditEl(null)} />
       <ProtocolSheet protocol={saved} onClose={() => setSaved(null)} />
-      <CompSheet open={compOpen} onClose={() => setCompOpen(false)} />
-      <SkaterPickSheet open={skaterOpen} onClose={() => setSkaterOpen(false)} />
     </div>
   );
 }

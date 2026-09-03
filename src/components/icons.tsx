@@ -159,6 +159,30 @@ export const IcSnow = mk(
   </>,
 );
 
+export const IcPlay = mk(<path d="M8 5.5v13a.6.6 0 0 0 .9.5l10.4-6.5a.6.6 0 0 0 0-1L8.9 5a.6.6 0 0 0-.9.5z" />);
+
+export const IcFilm = mk(
+  <>
+    <rect x="3" y="5" width="18" height="14" rx="2.5" />
+    <path d="m10.5 9.5 4 2.5-4 2.5z" />
+  </>,
+);
+
+export const IcLink = mk(
+  <>
+    <path d="M10 14a4.5 4.5 0 0 0 6.4.4l3-3a4.5 4.5 0 0 0-6.4-6.4l-1.5 1.5" />
+    <path d="M14 10a4.5 4.5 0 0 0-6.4-.4l-3 3a4.5 4.5 0 0 0 6.4 6.4l1.5-1.5" />
+  </>,
+);
+
+export const IcUpload = mk(
+  <>
+    <path d="M12 15V4.5" />
+    <path d="m7.5 9 4.5-4.5L16.5 9" />
+    <path d="M4.5 15.5v2.5a1.5 1.5 0 0 0 1.5 1.5h12a1.5 1.5 0 0 0 1.5-1.5v-2.5" />
+  </>,
+);
+
 /* brand mark: a skater's blade trace */
 export const IcBlade = mk(
   <>
