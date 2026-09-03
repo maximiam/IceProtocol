@@ -9,6 +9,33 @@ import { IcChevR, IcSearch, IcUsers } from "../components/icons";
 
 type Filter = "all" | Discipline;
 
+/* ISU CDN portrait with graceful fallback chain: 2025/26 season → 2024/25 → initials */
+function SkaterPhoto({ s, size = 44 }: { s: Skater; size?: number }) {
+  const [st, setSt] = useState(0);
+  const init = s.name
+    .split(/[\s/]+/)
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+  if (!s.slug || st > 1) {
+    return (
+      <div className="avatar" style={{ width: size, height: size, borderRadius: 13, fontSize: 13, flexShrink: 0 }}>
+        {init}
+      </div>
+    );
+  }
+  const season = st === 0 ? "2025-2026" : "2024-2025";
+  return (
+    <img
+      src={`https://isu-d8g8b4b7ece7aphs.a03.azurefd.net/isudamcontainer/CMS/Fansite/Figure-Skating/${season}/Skater-Portraits/${s.slug}.jpg`}
+      onError={() => setSt((x) => x + 1)}
+      alt={s.name}
+      style={{ width: size, height: size, borderRadius: 13, objectFit: "cover", flexShrink: 0, background: "var(--glass-2)" }}
+    />
+  );
+}
+
 export function Skaters() {
   const { t, lang } = useApp();
   const [q, setQ] = useState("");
@@ -30,7 +57,7 @@ export function Skaters() {
         <h1 className="h1">
           {t("nav_skaters")} <em>ISU</em>
         </h1>
-        <p className="sub">{t("pb_isu")}</p>
+        <p className="sub">{t("pb_note")}</p>
       </Reveal>
 
       <Reveal delay={50}>
@@ -60,20 +87,43 @@ export function Skaters() {
       ) : (
         filtered.map((s, i) => (
           <Reveal key={s.id} delay={Math.min(i * 35, 280)}>
-            <button className="list-row glass glass-tight" type="button" style={{ width: "100%", textAlign: "left" }} onClick={() => setSel(s)}>
-              <span className="flag">{s.flag}</span>
+            <div className="list-row glass glass-tight" style={{ cursor: "pointer" }} onClick={() => setSel(s)}>
+              <SkaterPhoto s={s} />
               <div className="meta">
                 <b>{lang === "ru" ? s.ru : s.name}</b>
                 <span>
-                  {lang === "ru" ? s.countryRu : s.country} · {t(discKey(s.disc))}
+                  {s.flag} {lang === "ru" ? s.countryRu : s.country} · {t(discKey(s.disc))}
                 </span>
               </div>
               <span className="score">{fmt(s.total)}</span>
+              {s.slug && (
+                <a
+                  className="badge cyan"
+                  href={`https://isu-skating.com/figure-skating/skaters/${s.slug}/`}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  style={{ textDecoration: "none", flexShrink: 0 }}
+                >
+                  ISU
+                </a>
+              )}
               <IcChevR size={15} className="opacity-40" />
-            </button>
+            </div>
           </Reveal>
         ))
       )}
+
+      <a
+        className="btn ghost sm"
+        href="https://isu-skating.com/figure-skating/skaters/"
+        target="_blank"
+        rel="noreferrer"
+        style={{ display: "flex", margin: "12px auto 0", textDecoration: "none" }}
+      >
+        <IcUsers size={14} />
+        {t("isu_registry")}
+      </a>
 
       <SkaterSheet skater={sel} onClose={() => setSel(null)} />
     </div>

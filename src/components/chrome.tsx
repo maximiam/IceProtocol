@@ -78,17 +78,6 @@ export function TopBar() {
         <button
           className="icon-btn"
           type="button"
-          onClick={() => {
-            buzz();
-            setTheme(theme === "dark" ? "light" : "dark");
-          }}
-          aria-label="theme"
-        >
-          {theme === "dark" ? <IcSun /> : <IcMoon />}
-        </button>
-        <button
-          className="icon-btn"
-          type="button"
           onClick={() => setView("profile")}
           aria-label="profile"
           style={{

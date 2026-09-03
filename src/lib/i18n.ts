@@ -179,6 +179,33 @@ const S = {
   close: { ru: "Закрыть", en: "Close" },
   protocol_of: { ru: "Протокол", en: "Protocol" },
   no_protocols_yet: { ru: "Здесь появятся ваши протоколы", en: "Your protocols will appear here" },
+
+  nav_judges: { ru: "Рейтинг судей", en: "Judges ranking" },
+  quick_judges: { ru: "Рейтинг судей", en: "Judges ranking" },
+  quick_judges_sub: { ru: "Кто оценил больше прокатов", en: "Who judged the most programs" },
+  pts: { ru: "очк.", en: "pts" },
+  you_badge: { ru: "вы", en: "you" },
+  your_rank: { ru: "Ваше место", en: "Your rank" },
+  to_next_pts: { ru: "До следующего места — {n} очк.", en: "{n} pts to the next rank" },
+  top_judge: { ru: "Вы лидер рейтинга!", en: "You lead the ranking!" },
+  how_pts: { ru: "15 очков за протокол · 1 очко за элемент", en: "15 pts per protocol · 1 pt per element" },
+  judge_first: { ru: "Оценить первый прокат", en: "Judge your first program" },
+
+  f_gp: { ru: "Гран-при", en: "Grand Prix" },
+  f_jgp: { ru: "Юниоры", en: "Juniors" },
+  f_cs: { ru: "Челленджер", en: "Challenger" },
+  f_champ: { ru: "Чемпионаты", en: "Championships" },
+  s_jgp: { ru: "JGP", en: "JGP" },
+  s_cs: { ru: "CS", en: "CS" },
+  s_wtt: { ru: "WTT", en: "WTT" },
+  official_calendar: { ru: "Официальный календарь ISU", en: "Official ISU calendar" },
+  in_days: { ru: "через {n} дн.", en: "in {n} d" },
+  today_word: { ru: "сегодня", en: "today" },
+  events_word: { ru: "событий", en: "events" },
+
+  isu_registry: { ru: "Вся база фигуристов — на isu.org", en: "Full skater registry — isu.org" },
+  open_on_isu: { ru: "Профиль ISU", en: "ISU profile" },
+  pb_note: { ru: "Личные рекорды по данным isu.org", en: "Personal bests per isu.org" },
 } as const;
 
 export type StrKey = keyof typeof S;

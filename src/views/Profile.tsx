@@ -99,15 +99,6 @@ export function Profile() {
               }}
             />
           </div>
-          <button className="settings-row" type="button" style={{ background: "none", border: "none", color: "inherit", width: "100%", cursor: "pointer", borderTop: "1px solid var(--glass-border)" }} onClick={() => setRulesOpen(true)}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <span className="qi" style={{ width: 30, height: 30, borderRadius: 9, display: "flex", alignItems: "center", justifyContent: "center", background: "var(--glass-2)", color: "var(--cyan)" }}>
-                <IcBook size={15} />
-              </span>
-              <div className="sname">{t("reference")}</div>
-            </div>
-            <IcChevR size={15} className="opacity-40" />
-          </button>
         </div>
       </Reveal>
 
