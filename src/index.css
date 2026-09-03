@@ -362,6 +362,11 @@ input[type="range"]::-moz-range-thumb {
 }
 .icon-btn:active { transform: scale(0.9); }
 .icon-btn svg { width: 18px; height: 18px; }
+.ver-pill {
+  font-size: 9px; font-weight: 800; letter-spacing: 0.6px; color: var(--mist-dim);
+  background: var(--glass-1); border: 1px solid var(--glass-border);
+  padding: 4px 7px; border-radius: 100px; user-select: none; flex-shrink: 0;
+}
 
 main { flex: 1; padding: 0 16px 150px; position: relative; }
 .view { animation: viewIn 0.38s cubic-bezier(0.2, 0.7, 0.2, 1); }
