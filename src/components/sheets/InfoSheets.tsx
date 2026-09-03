@@ -206,8 +206,6 @@ export function RulesSheet({ open, onClose }: { open: boolean; onClose: () => vo
           </div>
         ))}
       </div>
-
-      <p style={{ fontSize: 11, color: "var(--mist-dim)", lineHeight: 1.6, margin: "16px 4px 4px" }}>{t("rules_note")}</p>
     </Sheet>
   );
 }

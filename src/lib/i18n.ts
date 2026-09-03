@@ -137,10 +137,6 @@ const S = {
   rules_pcs: { ru: "Факторы компонентов", en: "Component factors" },
   rules_pcs_sub: { ru: "Компоненты: композиция, подача, скейтинг-скиллс (0.25–10.00)", en: "Components: composition, presentation, skating skills (0.25–10.00)" },
   rules_ded: { ru: "Вычеты", en: "Deductions" },
-  rules_note: {
-    ru: "Тренировочный инструмент по правилам ISU 2025/26. Официальные документы — isu.org.",
-    en: "Training tool based on ISU 2025/26 rules. Official documents — isu.org.",
-  },
   m_x: { ru: "x — бонус 10% за прыжок во второй половине программы", en: "x — 10% bonus for a jump in the second half" },
   m_lt: { ru: "< — недокручен: базовая стоимость × 0.7", en: "< — under-rotated: base value × 0.7" },
   m_dg: { ru: "<< — понижен: базовая стоимость × 0.5", en: "<< — downgraded: base value × 0.5" },
