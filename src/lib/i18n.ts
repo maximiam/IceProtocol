@@ -267,6 +267,14 @@ const S = {
   video_file: { ru: "Локальный файл", en: "Local file" },
   video_link: { ru: "Ссылка", en: "Link" },
   video_invalid: { ru: "Введите ссылку на видео", en: "Enter a video link" },
+
+  blogger_title: { ru: "Блогер-судья", en: "Judge-cam" },
+  blogger_sub: { ru: "Кружок: запиши, как ты судишь и комментируешь", en: "Video note: record yourself judging & commenting" },
+  blogger_clip: { ru: "Твой кружок готов", en: "Your video note is ready" },
+  blogger_download: { ru: "Скачать", en: "Download" },
+  blogger_denied: { ru: "Нет доступа к камере или микрофону", en: "Camera / microphone access denied" },
+  blogger_saved: { ru: "Кружок записан", en: "Video note recorded" },
+  blogger_hint: { ru: "Камера работает, пока ты оцениваешь элементы ниже. Перетаскивай кружок.", en: "Camera stays on while you score elements below. Drag the bubble." },
 } as const;
 
 export type StrKey = keyof typeof S;

@@ -58,6 +58,7 @@ function PcsSlider({
 }
 import { ScoreBar } from "../components/chrome";
 import { VideoFrame } from "../components/VideoFrame";
+import { BloggerCam } from "../components/BloggerCam";
 import { PickerSheet } from "../components/sheets/PickerSheet";
 import { GoeSheet } from "../components/sheets/GoeSheet";
 import { ProtocolSheet } from "../components/sheets/InfoSheets";
@@ -115,6 +116,7 @@ export function Studio() {
       </Reveal>
 
       <VideoFrame />
+      <BloggerCam />
 
       <SectionLabel>{t("elements_title")}</SectionLabel>
 

@@ -183,6 +183,38 @@ export const IcUpload = mk(
   </>,
 );
 
+export const IcCam = mk(
+  <>
+    <rect x="2.5" y="6.5" width="13" height="11" rx="2.5" />
+    <path d="m15.5 10.5 5-3v9l-5-3" />
+  </>,
+);
+
+export const IcMic = mk(
+  <>
+    <rect x="9" y="2.5" width="6" height="11" rx="3" />
+    <path d="M5.5 11.5a6.5 6.5 0 0 0 13 0" />
+    <path d="M12 18v3.5M9 21.5h6" />
+  </>,
+);
+
+export const IcMicOff = mk(
+  <>
+    <path d="M9 5.5a3 3 0 0 1 6 0v5.5a3 3 0 0 1-.5 1.65" />
+    <path d="M9 9.5v4a3 3 0 0 0 4.6 2.5" />
+    <path d="M5.5 11.5a6.5 6.5 0 0 0 10 5.4M18.5 11.5c0 .9-.18 1.76-.5 2.55" />
+    <path d="M12 18v3.5M9 21.5h6" />
+    <path d="m4 3.5 16 17" />
+  </>,
+);
+
+export const IcDownload = mk(
+  <>
+    <path d="M12 3.5V14M7.5 9.5 12 14l4.5-4.5" />
+    <path d="M4.5 16v2.5a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V16" />
+  </>,
+);
+
 /* brand mark: a skater's blade trace */
 export const IcBlade = mk(
   <>
