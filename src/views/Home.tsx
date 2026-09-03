@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useApp, useNow } from "../store";
 import { EVENTS } from "../data/skaters";
 import type { Category, Discipline, Protocol, Segment } from "../lib/scoring";
-import { ALL_DISCIPLINES, catKey, categoryOf, discKey, fmt, segKey, SINGLES } from "../lib/scoring";
+import { catKey, discKey, fmt, segKey } from "../lib/scoring";
 import { Chip, Reveal, SectionLabel } from "../components/ui";
 import { ProtocolSheet, RulesSheet } from "../components/sheets/InfoSheets";
 import { JudgesBoard } from "./Judges";
@@ -15,11 +15,20 @@ export function Home() {
   const now = useNow(1000);
   const [rulesOpen, setRulesOpen] = useState(false);
   const [sel, setSel] = useState<Protocol | null>(null);
-  const [disc, setDisc] = useState<Discipline>("men");
+  const [group, setGroup] = useState<"m" | "l" | "pairs" | "dance">("m");
   const [seg, setSeg] = useState<Segment>("sp");
   const [cat, setCat] = useState<Category>("senior");
 
-  const effCat = categoryOf(disc, cat);
+  const disc: Discipline =
+    group === "m"
+      ? cat === "senior"
+        ? "men"
+        : "jmen"
+      : group === "l"
+        ? cat === "senior"
+          ? "ladies"
+          : "jladies"
+        : group;
 
   const next = useMemo(
     () =>
@@ -45,7 +54,7 @@ export function Home() {
 
   const openStudio = () => {
     buzz("medium");
-    patchDraft({ discipline: disc, segment: seg, category: effCat });
+    patchDraft({ discipline: disc, segment: seg, category: cat });
     setView("studio");
   };
 
@@ -104,31 +113,32 @@ export function Home() {
           <b style={{ fontFamily: "var(--font-display)", fontSize: 16.5, fontWeight: 600 }}>{t("new_protocol")}</b>
           <div style={{ fontSize: 12, color: "var(--mist-dim)", marginTop: 2, marginBottom: 12 }}>{t("cat_note")}</div>
 
-          <div className="field-label">{t("discipline")}</div>
-          <div className="chip-row" style={{ marginBottom: 10 }}>
-            {ALL_DISCIPLINES.map((d) => (
-              <Chip key={d} active={disc === d} onClick={() => { setDisc(d); buzz(); }}>
-                {t(discKey(d))}
-              </Chip>
+          <div className="field-label">{t("cat_label")}</div>
+          <div className="seg-toggle" style={{ marginBottom: 12 }}>
+            {(["senior", "junior"] as Category[]).map((c) => (
+              <button key={c} type="button" className={cat === c ? "active" : ""} onClick={() => { setCat(c); buzz(); }}>
+                {t(catKey(c))}
+              </button>
             ))}
           </div>
 
           <div className="field-label">
-            {t("cat_label")} · <span style={{ color: "var(--cyan)" }}>{t(catKey(effCat))}</span>
+            {t("discipline")} · <span style={{ color: "var(--cyan)" }}>{t(discKey(disc))}</span>
           </div>
-          {SINGLES.includes(disc) ? (
-            <div className="glass glass-tight" style={{ padding: "9px 13px", fontSize: 12, color: "var(--mist)", marginBottom: 10, lineHeight: 1.5 }}>
-              {t(catKey(effCat))} — {t(discKey(disc))}
-            </div>
-          ) : (
-            <div className="seg-toggle" style={{ marginBottom: 10 }}>
-              {(["senior", "junior"] as Category[]).map((c) => (
-                <button key={c} type="button" className={effCat === c ? "active" : ""} onClick={() => { setCat(c); buzz(); }}>
-                  {t(catKey(c))}
-                </button>
-              ))}
-            </div>
-          )}
+          <div className="chip-row" style={{ marginBottom: 12 }}>
+            {(
+              [
+                { g: "m", label: cat === "senior" ? t("disc_men") : t("disc_jmen") },
+                { g: "l", label: cat === "senior" ? t("disc_ladies") : t("disc_jladies") },
+                { g: "pairs", label: t("disc_pairs") },
+                { g: "dance", label: t("disc_dance") },
+              ] as { g: "m" | "l" | "pairs" | "dance"; label: string }[]
+            ).map((o) => (
+              <Chip key={o.g} active={group === o.g} onClick={() => { setGroup(o.g); buzz(); }}>
+                {o.label}
+              </Chip>
+            ))}
+          </div>
 
           <div className="field-label">{t("segment")}</div>
           <div className="seg-toggle" style={{ marginBottom: 12 }}>
