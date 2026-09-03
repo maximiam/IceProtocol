@@ -1,12 +1,12 @@
 <!doctype html>
-<html lang="ru" data-theme="dark">
+<html lang="ru" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1, user-scalable=no"
     />
-    <meta name="theme-color" content="#050b16" />
+    <meta name="theme-color" content="#f2f7fb" />
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
@@ -15,16 +15,17 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=Manrope:wght@400;500;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,400;0,500;0,600;0,700;1,500;1,600&family=Montserrat:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
     <script>
       (function () {
-        var theme = "dark";
+        var theme = "light";
         try {
-          var s = localStorage.getItem("fsj:theme");
+          var raw = localStorage.getItem("fsj:theme");
+          var s = null;
+          try { s = raw ? JSON.parse(raw) : raw; } catch (e2) { s = raw; }
           if (s === "light" || s === "dark") theme = s;
-          else if (window.matchMedia && matchMedia("(prefers-color-scheme: light)").matches) theme = "light";
           var tg = window.Telegram && window.Telegram.WebApp;
           if (!s && tg && tg.colorScheme) theme = tg.colorScheme;
         } catch (e) {}
@@ -32,8 +33,8 @@
       })();
     </script>
     <style>
-      html { background: #050b16; }
-      html[data-theme="light"] { background: #eef4fa; }
+      html { background: #f2f7fb; }
+      html[data-theme="dark"] { background: #12101f; }
     </style>
   </head>
   <body>

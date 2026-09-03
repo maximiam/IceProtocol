@@ -35,8 +35,10 @@ export const Telegram = {
       const w = tg();
       w?.ready();
       w?.expand();
-      w?.setHeaderColor?.("#050b16");
-      w?.setBackgroundColor?.("#050b16");
+      const dark = document.documentElement.getAttribute("data-theme") === "dark";
+      const base = dark ? "#12101f" : "#f2f7fb";
+      w?.setHeaderColor?.(base);
+      w?.setBackgroundColor?.(base);
     } catch {
       /* outside Telegram */
     }
@@ -44,8 +46,8 @@ export const Telegram = {
   setColors(dark: boolean) {
     try {
       const w = tg();
-      w?.setHeaderColor?.(dark ? "#050b16" : "#eef4fa");
-      w?.setBackgroundColor?.(dark ? "#050b16" : "#eef4fa");
+      w?.setHeaderColor?.(dark ? "#12101f" : "#f2f7fb");
+      w?.setBackgroundColor?.(dark ? "#12101f" : "#f2f7fb");
     } catch {
       /* noop */
     }
