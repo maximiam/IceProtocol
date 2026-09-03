@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Sheet, Chip } from "../ui";
 import { useApp } from "../../store";
 import {
@@ -10,6 +10,7 @@ import {
   JUMP_GROUPS,
   PAIRS_LIFTS,
   PAIRS_SPINS,
+  PST,
   SINGLES_SPINS,
   SPIN_LEVEL_KEYS,
   STSQ,
@@ -21,10 +22,19 @@ import {
 } from "../../data/elements";
 import type { Category, Discipline, ElemType, Segment, SlotSet } from "../../lib/scoring";
 import { categoryOf, comboBase, countByType, getLimits, r2, uid } from "../../lib/scoring";
-import { IcPlus, IcX } from "../icons";
+import { IcCheck, IcPlus, IcX } from "../icons";
 
-type JumpTab = "combo" | "single" | "twist" | "throw";
-type Tab = "jump" | "lift" | "spin" | "step" | "choreo";
+type JumpTab = "single" | "twist" | "throw";
+type Tab = "jump" | "combo" | "lift" | "spin" | "step" | "choreo";
+
+export interface NewElement {
+  type: ElemType;
+  code: string;
+  name: string;
+  base: number;
+  defCode?: string;
+  levelIdx?: number;
+}
 
 interface Props {
   open: boolean;
@@ -32,67 +42,81 @@ interface Props {
   discipline: Discipline;
   segment: Segment;
   category: Category;
+  /** when set, the sheet works in "replace" mode: picked element is returned instead of appended */
+  onPick?: (el: NewElement) => void;
 }
 
-export function PickerSheet({ open, onClose, discipline, segment, category }: Props) {
+/* remembered last-used level per element family (persisted for the session) */
+const levelMemory: Record<string, number> = {};
+
+/** map picker tab to element type for slot accounting */
+const tabType = (k: Tab): ElemType => (k === "combo" ? "jump" : k);
+
+export function PickerSheet({ open, onClose, discipline, segment, category, onPick }: Props) {
   const { t, lang, draft, addElement, buzz, showToast } = useApp();
   const cat = categoryOf(discipline, category);
   const limits = getLimits(discipline, segment, cat);
   const counts = useMemo(() => countByType(draft.elements), [draft.elements]);
+  const replaceMode = !!onPick;
 
-  const [tab, setTab] = useState<Tab>("jump");
-  const [combo, setCombo] = useState<ElemDef[]>([]);
-  const [jumpTab, setJumpTab] = useState<JumpTab>("combo");
-  const [level, setLevel] = useState(1);
-
+  const hasJumps = limits.jump > 0 && discipline !== "pairs";
   const availableTabs: Tab[] = useMemo(() => {
     const list: Tab[] = [];
-    if (limits.jump > 0) list.push("jump");
+    if (hasJumps) list.push("jump", "combo");
+    if (limits.jump > 0 && discipline === "pairs") list.push("jump");
     if (limits.lift > 0) list.push("lift");
     if (limits.spin > 0) list.push("spin");
     if (limits.step > 0) list.push("step");
     if (limits.choreo > 0) list.push("choreo");
     return list;
-  }, [limits]);
+  }, [limits, discipline, hasJumps]);
 
-  const safeTab = availableTabs.includes(tab) ? tab : availableTabs[0] ?? "spin";
+  const [tab, setTab] = useState<Tab>("jump");
+  const [combo, setCombo] = useState<ElemDef[]>([]);
+  const [jumpTab, setJumpTab] = useState<JumpTab>("single");
+  const [level, setLevel] = useState(1);
+
+  useEffect(() => {
+    if (open) {
+      if (!availableTabs.includes(tab)) setTab(availableTabs[0] ?? "spin");
+      setCombo([]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  const safeTab: Tab = availableTabs.includes(tab) ? tab : availableTabs[0] ?? "spin";
 
   const spinCatalog: LeveledDef[] =
     discipline === "dance" ? DANCE_SPINS : discipline === "pairs" ? [...SINGLES_SPINS, ...PAIRS_SPINS] : SINGLES_SPINS;
-
-  const stepCatalog: LeveledDef[] = discipline === "dance" ? [{ ...STSQ, name: lang === "ru" ? "Дорожка шагов / секция паттерна" : "Step / pattern section" }] : [STSQ];
-
-  const choreoCatalog: ElemDef[] = discipline === "dance" ? DANCE_CHOREO : CHSQ;
   const liftCatalog: LeveledDef[] = discipline === "pairs" ? PAIRS_LIFTS : DANCE_SHORT_LIFTS;
+  const choreoCatalog: ElemDef[] = discipline === "dance" ? DANCE_CHOREO : CHSQ;
 
-  const addEl = (e: { type: ElemType; code: string; name: string; base: number }) => {
-    if (counts[e.type] >= limits[e.type]) {
+  const full = (ty: ElemType) => counts[ty] >= limits[ty];
+
+  const addEl = (e: NewElement) => {
+    if (!replaceMode && full(e.type)) {
       showToast(t("limit_note"));
       buzz("error");
       return;
     }
-    addElement({ id: uid(), type: e.type, code: e.code, name: e.name, base: e.base, flags: [], goe: 0 });
+    if (replaceMode && onPick) {
+      onPick(e);
+      onClose();
+      return;
+    }
+    addElement({ id: uid(), type: e.type, code: e.code, name: e.name, base: e.base, flags: [], goe: 0, defCode: e.defCode, levelIdx: e.levelIdx });
     buzz("medium");
   };
 
   const addCombo = () => {
     if (!combo.length) return;
-    if (counts.jump >= limits.jump) {
-      showToast(t("limit_note"));
-      buzz("error");
-      return;
-    }
-    addElement({
-      id: uid(),
+    addEl({
       type: "jump",
       code: combo.map((c) => c.code).join("+"),
       name: combo.map((c) => c.name).join(" + "),
       base: comboBase(combo.map((c) => c.base)),
-      flags: [],
-      goe: 0,
     });
     setCombo([]);
-    buzz("medium");
   };
 
   const gridBtn = "glass glass-tight";
@@ -117,90 +141,99 @@ export function PickerSheet({ open, onClose, discipline, segment, category }: Pr
     </div>
   );
 
-  const LeveledGrid = ({ items, type }: { items: LeveledDef[]; type: ElemType }) => (
-    <div>
-      <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "2px 0 10px" }}>
-        <span style={{ fontSize: 11, color: "var(--mist-dim)", fontWeight: 700 }}>{t("base_value")}:</span>
-        {SPIN_LEVEL_KEYS.map((k, i) => (
-          <button
-            key={k}
-            type="button"
-            className={`flag-chip ${level === i ? "active" : ""}`}
-            style={{ padding: "6px 11px" }}
-            onClick={() => {
-              setLevel(i);
-              buzz();
-            }}
-          >
-            {k}
-          </button>
-        ))}
-      </div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 8 }}>
-        {items.map((s) => {
-          const base = s.bases[level] ?? 0;
-          const disabled = base <= 0;
-          return (
+  const setLvl = (i: number, family: string) => {
+    setLevel(i);
+    levelMemory[family] = i;
+    buzz();
+  };
+
+  const LeveledGrid = ({ items, type, family }: { items: LeveledDef[]; type: ElemType; family: string }) => {
+    const lvl = levelMemory[family] ?? level;
+    return (
+      <div>
+        <div style={{ display: "flex", alignItems: "center", gap: 7, margin: "2px 0 10px", flexWrap: "wrap" }}>
+          <span style={{ fontSize: 11, color: "var(--mist-dim)", fontWeight: 700 }}>{t("lvl")}:</span>
+          {SPIN_LEVEL_KEYS.map((k, i) => (
             <button
-              key={s.code}
+              key={k}
               type="button"
-              className={gridBtn}
-              disabled={disabled}
-              style={{ ...gridStyle, padding: "12px 8px", flexDirection: "row", justifyContent: "space-between", opacity: disabled ? 0.35 : 1 }}
-              onClick={() =>
-                addEl({
-                  type,
-                  code: `${s.code}${SPIN_LEVEL_KEYS[level]}`,
-                  name: s.name,
-                  base,
-                })
-              }
+              className={`flag-chip ${lvl === i ? "active" : ""}`}
+              style={{ padding: "6px 13px" }}
+              onClick={() => setLvl(i, family)}
             >
-              <span style={{ textAlign: "left", minWidth: 0 }}>
-                <b style={{ fontSize: 13, display: "block" }}>
-                  {s.code}
-                  {SPIN_LEVEL_KEYS[level]}
-                </b>
-                <span style={{ fontSize: 10, color: "var(--mist-dim)" }}>{s.name}</span>
-              </span>
-              <span style={{ fontSize: 13, fontWeight: 800, color: "var(--cyan)", flexShrink: 0 }}>{base.toFixed(1)}</span>
+              {k}
             </button>
-          );
-        })}
+          ))}
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 8 }}>
+          {items.map((s) => {
+            const base = s.bases[lvl] ?? 0;
+            const disabled = base <= 0;
+            return (
+              <button
+                key={s.code}
+                type="button"
+                className={gridBtn}
+                disabled={disabled}
+                style={{ ...gridStyle, padding: "12px 9px", flexDirection: "row", justifyContent: "space-between", opacity: disabled ? 0.35 : 1 }}
+                onClick={() =>
+                  addEl({
+                    type,
+                    code: `${s.code}${SPIN_LEVEL_KEYS[lvl]}`,
+                    name: s.name,
+                    base,
+                    defCode: s.code,
+                    levelIdx: lvl,
+                  })
+                }
+              >
+                <span style={{ textAlign: "left", minWidth: 0 }}>
+                  <b style={{ fontSize: 13, display: "block" }}>
+                    {s.code}
+                    {SPIN_LEVEL_KEYS[lvl]}
+                  </b>
+                  <span style={{ fontSize: 10, color: "var(--mist-dim)" }}>{s.name}</span>
+                </span>
+                <span style={{ fontSize: 13, fontWeight: 800, color: "var(--cyan)", flexShrink: 0 }}>{base.toFixed(1)}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const comboTotal = comboBase(combo.map((c) => c.base));
 
   return (
-    <Sheet open={open} onClose={onClose} title={t("picker_title")} sub={t("picker_sub")}>
+    <Sheet open={open} onClose={onClose} title={replaceMode ? t("replace_elem") : t("picker_title")} sub={t("picker_sub")}>
       <div style={{ display: "flex", gap: 6, marginBottom: 14, flexWrap: "wrap" }}>
         {availableTabs.map((k) => {
           const label =
-            k === "jump" ? t("jumps") : k === "lift" ? t("type_lift") : k === "spin" ? t("spins") : k === "step" ? t("steps") : t("choreo");
+            k === "jump" ? t("jumps") : k === "combo" ? t("combo") : k === "lift" ? t("type_lift") : k === "spin" ? t("spins") : k === "step" ? t("steps") : t("choreo");
           return (
             <Chip key={k} active={safeTab === k} onClick={() => setTab(k)}>
               {label}
-              <span style={{ opacity: 0.75 }}>
-                {counts[k]}/{limits[k]}
-              </span>
+              {!replaceMode && limits[tabType(k)] > 0 && (
+                <span style={{ opacity: 0.75 }}>
+                  {counts[tabType(k)]}/{limits[tabType(k)]}
+                </span>
+              )}
             </Chip>
           );
         })}
       </div>
 
+      {/* ---------------- jumps ---------------- */}
       {safeTab === "jump" && discipline !== "pairs" && (
-        <>
-          <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
-            <Chip active={jumpTab === "combo"} onClick={() => setJumpTab("combo")}>
-              {t("combo")}
-            </Chip>
-            <Chip active={jumpTab === "single"} onClick={() => setJumpTab("single")}>
-              {t("single")}
-            </Chip>
-          </div>
-        </>
+        <div className="cat-group">
+          {Object.entries(JUMP_GROUPS).map(([key, g]) => (
+            <div key={key}>
+              <div className="cat-title">{g.group}</div>
+              <JumpGrid jumps={filterJumps(discipline, g.jumps)} />
+            </div>
+          ))}
+        </div>
       )}
 
       {safeTab === "jump" && discipline === "pairs" && (
@@ -216,91 +249,101 @@ export function PickerSheet({ open, onClose, discipline, segment, category }: Pr
               {t("throws")}
             </Chip>
           </div>
+          {jumpTab === "single" && (
+            <div className="cat-group">
+              {Object.entries(JUMP_GROUPS)
+                .filter(([k]) => k !== "euler")
+                .map(([key, g]) => (
+                  <div key={key}>
+                    <div className="cat-title">{g.group}</div>
+                    <JumpGrid jumps={filterJumps(discipline, g.jumps)} />
+                  </div>
+                ))}
+            </div>
+          )}
+          {jumpTab === "twist" && <LeveledGrid items={TWISTS} type="jump" family="tw" />}
+          {jumpTab === "throw" && (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8 }}>
+              {THROWS.map((th) => (
+                <button key={th.code} type="button" className={gridBtn} style={gridStyle} onClick={() => addEl({ type: "jump", code: th.code, name: th.name, base: th.base })}>
+                  <b style={{ fontSize: 12.5 }}>{th.code}</b>
+                  <span style={{ fontSize: 10, color: "var(--mist-dim)" }}>{th.base.toFixed(1)}</span>
+                </button>
+              ))}
+            </div>
+          )}
         </>
       )}
 
-      {safeTab === "jump" && jumpTab === "combo" && discipline !== "pairs" && (
-        <div className="glass glass-tight" style={{ padding: 14, marginBottom: 12 }}>
-          <div className="slot-grid" style={{ marginBottom: 8 }}>
-            {[0, 1, 2].map((i) => {
-              const c = combo[i];
-              return (
-                <span key={i} className={`slot ${c ? "zero" : ""}`} style={{ width: 52, fontSize: 12 }}>
-                  {c ? c.code : "—"}
-                </span>
-              );
-            })}
-          </div>
-          <div style={{ fontSize: 11.5, color: "var(--mist-dim)", marginBottom: 10, lineHeight: 1.5 }}>
-            {t("combo_hint")} · {t("base_value")}: <b style={{ color: "var(--cyan)" }}>{r2(comboTotal).toFixed(2)}</b>
-          </div>
-          {Object.entries(JUMP_GROUPS).map(([key, g]) => (
-            <div key={key} className="cat-group">
-              <div className="cat-title">{g.group}</div>
-              <div style={{ display: "flex", gap: 6 }}>
-                {filterJumps(discipline, g.jumps).map((j) => {
-                  const inCombo = combo.some((c) => c.code === j.code);
-                  const full = combo.length >= 3;
-                  return (
-                    <button
-                      key={j.code}
-                      type="button"
-                      className={`flag-chip ${inCombo ? "active" : ""}`}
-                      disabled={full && !inCombo}
-                      style={{ opacity: full && !inCombo ? 0.35 : 1 }}
-                      onClick={() => {
-                        setCombo((prev) => (inCombo ? prev.filter((c) => c.code !== j.code) : [...prev, j]));
-                        buzz();
-                      }}
-                    >
-                      {j.code}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-          <button className="btn sm" type="button" style={{ width: "100%", marginTop: 12 }} disabled={combo.length === 0} onClick={addCombo}>
-            <IcPlus size={14} />
-            {t("confirm_combo")} · {r2(comboTotal).toFixed(2)}
-          </button>
-        </div>
-      )}
-
-      {safeTab === "jump" && jumpTab === "single" && (
-        <div className="cat-group">
-          {discipline === "pairs" ? (
-            <>
-              <div className="cat-title">{t("jumps")}</div>
-              <JumpGrid jumps={filterJumps(discipline, JUMP_GROUPS.axel.jumps).concat(filterJumps(discipline, JUMP_GROUPS.toeloop.jumps), filterJumps(discipline, JUMP_GROUPS.salchow.jumps), filterJumps(discipline, JUMP_GROUPS.loop.jumps), filterJumps(discipline, JUMP_GROUPS.flip.jumps), filterJumps(discipline, JUMP_GROUPS.lutz.jumps))} />
-            </>
-          ) : (
-            Object.entries(JUMP_GROUPS).map(([key, g]) => (
+      {/* ---------------- combo builder ---------------- */}
+      {safeTab === "combo" && (
+        <div>
+          <div style={{ fontSize: 11.5, color: "var(--mist-dim)", marginBottom: 10, lineHeight: 1.5 }}>{t("combo_hint")}</div>
+          <div className="cat-group">
+            {Object.entries(JUMP_GROUPS).map(([key, g]) => (
               <div key={key}>
                 <div className="cat-title">{g.group}</div>
-                <JumpGrid jumps={filterJumps(discipline, g.jumps)} />
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                  {filterJumps(discipline, g.jumps).map((j) => {
+                    const inCombo = combo.some((c) => c.code === j.code);
+                    const isFull = combo.length >= 3;
+                    return (
+                      <button
+                        key={j.code}
+                        type="button"
+                        className={`flag-chip ${inCombo ? "active" : ""}`}
+                        disabled={isFull && !inCombo}
+                        style={{ opacity: isFull && !inCombo ? 0.35 : 1, minWidth: 52 }}
+                        onClick={() => {
+                          setCombo((prev) => (inCombo ? prev.filter((c) => c.code !== j.code) : [...prev, j]));
+                          buzz();
+                        }}
+                      >
+                        {j.code}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            ))
-          )}
-        </div>
-      )}
-
-      {safeTab === "jump" && jumpTab === "twist" && discipline === "pairs" && <LeveledGrid items={TWISTS} type="jump" />}
-      {safeTab === "jump" && jumpTab === "throw" && discipline === "pairs" && (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8 }}>
-          {THROWS.map((th) => (
-            <button key={th.code} type="button" className={gridBtn} style={gridStyle} onClick={() => addEl({ type: "jump", code: th.code, name: th.name, base: th.base })}>
-              <b style={{ fontSize: 12.5 }}>{th.code}</b>
-              <span style={{ fontSize: 10, color: "var(--mist-dim)" }}>{th.base.toFixed(1)}</span>
+            ))}
+          </div>
+          <div className="combo-preview">
+            <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", marginBottom: combo.length ? 10 : 0 }}>
+              <span style={{ fontSize: 11, color: "var(--mist-dim)", fontWeight: 700 }}>{t("combo_sel")}:</span>
+              {combo.length === 0 && <span style={{ fontSize: 12, color: "var(--mist-dim)" }}>{t("combo_empty")}</span>}
+              {combo.map((c, i) => (
+                <span key={c.code} className="flag-chip active" style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+                  {i > 0 && <span style={{ opacity: 0.6 }}>+</span>}
+                  {c.code}
+                  <button
+                    type="button"
+                    onClick={() => setCombo((prev) => prev.filter((x) => x.code !== c.code))}
+                    style={{ background: "none", border: "none", color: "inherit", padding: 0, display: "flex", cursor: "pointer" }}
+                    aria-label="remove"
+                  >
+                    <IcX size={11} />
+                  </button>
+                </span>
+              ))}
+              {combo.length > 0 && (
+                <b style={{ marginLeft: "auto", fontFamily: "var(--font-display)", fontSize: 15, fontWeight: 600, color: "var(--cyan)" }}>
+                  {r2(comboTotal).toFixed(2)}
+                </b>
+              )}
+            </div>
+            <button className="btn" type="button" disabled={combo.length === 0} onClick={addCombo} style={{ width: "100%" }}>
+              <IcPlus size={15} />
+              {t("confirm_combo")}
             </button>
-          ))}
+          </div>
         </div>
       )}
 
+      {/* ---------------- lifts ---------------- */}
       {safeTab === "lift" && (
         <>
           <div className="cat-title">{discipline === "pairs" ? t("type_lift") : t("short_lifts")}</div>
-          <LeveledGrid items={liftCatalog} type="lift" />
+          <LeveledGrid items={liftCatalog} type="lift" family={discipline === "pairs" ? "plift" : "dlift"} />
           {discipline === "dance" && (
             <>
               <div className="cat-title">{t("long_lift")}</div>
@@ -316,9 +359,30 @@ export function PickerSheet({ open, onClose, discipline, segment, category }: Pr
         </>
       )}
 
-      {safeTab === "spin" && <LeveledGrid items={spinCatalog} type="spin" />}
-      {safeTab === "step" && <LeveledGrid items={stepCatalog} type="step" />}
+      {/* ---------------- spins ---------------- */}
+      {safeTab === "spin" && <LeveledGrid items={spinCatalog} type="spin" family={discipline === "dance" ? "dspin" : discipline === "pairs" ? "pspin" : "spin"} />}
 
+      {/* ---------------- steps ---------------- */}
+      {safeTab === "step" && (
+        <>
+          <LeveledGrid items={[STSQ]} type="step" family="step" />
+          {discipline === "dance" && (
+            <>
+              <div className="cat-title">PSt · {t("steps")}</div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8 }}>
+                {PST.map((p) => (
+                  <button key={p.code} type="button" className={gridBtn} style={gridStyle} onClick={() => addEl({ type: "step", code: p.code, name: p.name, base: p.base })}>
+                    <b style={{ fontSize: 13 }}>{p.code}</b>
+                    <span style={{ fontSize: 10, color: "var(--mist-dim)" }}>{p.base.toFixed(1)}</span>
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+        </>
+      )}
+
+      {/* ---------------- choreo ---------------- */}
       {safeTab === "choreo" && (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 8 }}>
           {choreoCatalog.map((c) => (
@@ -333,11 +397,18 @@ export function PickerSheet({ open, onClose, discipline, segment, category }: Pr
         </div>
       )}
 
-      {counts[safeTab] >= limits[safeTab] && (
+      {!replaceMode && full(safeTab === "combo" ? "jump" : safeTab) && (
         <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 12, fontSize: 11.5, color: "var(--gold)", fontWeight: 700 }}>
           <IcX size={12} />
-          {t("limit_note")} ({counts[safeTab]}/{limits[safeTab]})
+          {t("limit_note")} ({counts[safeTab === "combo" ? "jump" : safeTab]}/{limits[safeTab === "combo" ? "jump" : safeTab]})
         </div>
+      )}
+
+      {!replaceMode && (
+        <button className="btn ghost" type="button" onClick={onClose} style={{ marginTop: 14 }}>
+          <IcCheck size={15} />
+          {t("done_word")}
+        </button>
       )}
     </Sheet>
   );

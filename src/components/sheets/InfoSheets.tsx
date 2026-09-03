@@ -294,7 +294,12 @@ export function ProtocolSheet({ protocol, onClose }: { protocol: Protocol | null
   };
 
   return (
-    <Sheet open={!!protocol} onClose={onClose} title={t("protocol_doc")} sub={`${catLabel} · ${discLabel} · ${segLabel}`}>
+    <Sheet
+      open={!!protocol}
+      onClose={onClose}
+      title={t("protocol_doc")}
+      sub={`${protocol.skaterFlag ? protocol.skaterFlag + " " : ""}${protocol.skater || "—"} · ${catLabel} · ${discLabel} · ${segLabel}`}
+    >
       <div className="isu">
         {/* official header */}
         <div className="isu-event">{protocol.competition || "ICEPROTOCOL"}</div>

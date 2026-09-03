@@ -62,6 +62,7 @@ import { GoeSheet } from "../components/sheets/GoeSheet";
 import { ProtocolSheet } from "../components/sheets/InfoSheets";
 import { CompSheet, SkaterPickSheet } from "../components/sheets/PickSheets";
 import { IcCalendar, IcCheck, IcChevR, IcPlus, IcScale, IcTrash, IcUsers } from "../components/icons";
+import { findLeveled, LEVEL_KEYS } from "../data/elements";
 
 const TYPE_KEY: Record<ElemType, "jumps" | "type_lift" | "spins" | "steps" | "choreo"> = {
   jump: "jumps",
@@ -218,17 +219,39 @@ export function Studio() {
         const score = elementScore(el);
         const bv = elementBV(el);
         const gv = goeValue(el);
+        const def = el.defCode ? findLeveled(el.defCode) : null;
+        const lvl = el.levelIdx ?? -1;
+
+        const bumpGoe = (d: number) => {
+          const g = Math.max(-5, Math.min(5, el.goe + d));
+          updateElement({ ...el, goe: g });
+          buzz();
+        };
+        const bumpLevel = (d: number) => {
+          if (!def || lvl < 0) return;
+          let n = lvl + d;
+          while (n >= 0 && n <= 4 && (!def.bases[n] || def.bases[n] <= 0)) n += d;
+          if (n < 0 || n > 4 || !def.bases[n] || def.bases[n] <= 0) return;
+          updateElement({ ...el, levelIdx: n, base: def.bases[n], code: `${def.code}${LEVEL_KEYS[n]}` });
+          buzz();
+        };
+        const flagCls = (f: string) =>
+          f === "x" ? "flag-chip-mini bonus" : ["<", "<<", "REP"].includes(f) ? "flag-chip-mini bad" : f === "V" ? "flag-chip-mini bad" : "flag-chip-mini";
+
         return (
-          <div key={el.id} className="elem-row glass glass-tight">
+          <div key={el.id} className="elem-row glass glass-tight" style={{ cursor: "pointer" }} onClick={() => { setEditEl(el); buzz(); }}>
             <span className="elem-idx">{i + 1}</span>
             <div className="elem-info">
-              <b style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+              <b style={{ display: "flex", alignItems: "center", gap: 5, flexWrap: "wrap" }}>
                 {el.code}
-                {el.flags.length > 0 && (
-                  <span className="elem-flags" style={{ marginTop: 0 }}>
-                    {el.flags.map((f) => (
-                      <i key={f}>{f}</i>
-                    ))}
+                {el.fall && <i className="flag-chip-mini fall-chip">{t("fall_mark")}</i>}
+                {el.flags.map((f) => (
+                  <i key={f} className={flagCls(f)}>{f}</i>
+                ))}
+                {def && (
+                  <span className="lvl-nav" onClick={(e) => e.stopPropagation()}>
+                    <button className="lvl-btn" type="button" onClick={() => bumpLevel(-1)} aria-label="level down">‹</button>
+                    <button className="lvl-btn" type="button" onClick={() => bumpLevel(1)} aria-label="level up">›</button>
                   </span>
                 )}
               </b>
@@ -237,17 +260,12 @@ export function Studio() {
                 {gv !== 0 && <span style={{ color: gv > 0 ? "var(--mint)" : "var(--ember)" }}> · GOE {gv > 0 ? "+" : ""}{gv.toFixed(2)}</span>}
               </span>
             </div>
-            <span
-              className={`elem-goe ${el.goe > 0 ? "pos" : el.goe < 0 ? "neg" : "zero"}`}
-              style={{ cursor: "pointer" }}
-              onClick={() => {
-                setEditEl(el);
-                buzz();
-              }}
-            >
-              {el.goe > 0 ? `+${el.goe}` : el.goe}
+            <span className="goe-step" onClick={(e) => e.stopPropagation()}>
+              <button className="goe-btn-mini" type="button" onClick={() => bumpGoe(-1)} aria-label="goe minus">−</button>
+              <span className={`goe-val ${el.goe > 0 ? "pos" : el.goe < 0 ? "neg" : "zero"}`}>{el.goe > 0 ? `+${el.goe}` : el.goe}</span>
+              <button className="goe-btn-mini" type="button" onClick={() => bumpGoe(1)} aria-label="goe plus">+</button>
             </span>
-            <b style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 15, minWidth: 52, textAlign: "right" }}>{score.toFixed(2)}</b>
+            <b style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 15, minWidth: 50, textAlign: "right" }}>{score.toFixed(2)}</b>
           </div>
         );
       })}
@@ -256,6 +274,9 @@ export function Studio() {
         <IcPlus size={15} />
         {t("add_element")}
       </button>
+      {draft.elements.length > 0 && (
+        <div style={{ fontSize: 10.5, color: "var(--mist-dim)", textAlign: "center", margin: "8px 0 0" }}>{t("tap_hint")}</div>
+      )}
 
       <SectionLabel>{t("pcs_title")}</SectionLabel>
       <Reveal delay={80}>

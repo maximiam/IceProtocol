@@ -124,8 +124,8 @@ const S = {
   elem_total: { ru: "За элемент", en: "Element total" },
   flags: { ru: "Отметки судьи", en: "Judge marks" },
   flag_hint: {
-    ru: "x — бонус 10% во второй половине · < — недокрут (70%) · << — понижение (50%) · q / ! / e — только для GOE",
-    en: "x — 10% bonus in 2nd half · < — under-rotated (70%) · << — downgraded (50%) · q / ! / e — affect GOE only",
+    ru: "x — бонус 10% во второй половине · < — недокрут (70%) · << — понижение (50%) · REP — повтор (70%) · q / ! / e — только для GOE · V — вариация ребра",
+    en: "x — 10% bonus in 2nd half · < — under-rotated (70%) · << — downgraded (50%) · REP — repeated (70%) · q / ! / e — affect GOE only · V — edge variation",
   },
   delete_elem: { ru: "Удалить элемент", en: "Delete element" },
   deleted_toast: { ru: "Элемент удалён", en: "Element deleted" },
@@ -184,6 +184,16 @@ const S = {
   local_judge: { ru: "локальный профиль", en: "local profile" },
   best_total: { ru: "лучшая сумма", en: "best total" },
   version: { ru: "IceProtocol 3.1 · SOV ISU 2025/26 · тренировочный инструмент", en: "IceProtocol 3.1 · ISU SOV 2025/26 · training tool" },
+
+  lvl: { ru: "Уровень", en: "Level" },
+  replace_elem: { ru: "Заменить элемент", en: "Replace element" },
+  combo_sel: { ru: "Каскад", en: "Combo" },
+  done_word: { ru: "Готово", en: "Done" },
+  fall_mark: { ru: "Падение", en: "Fall" },
+  fall_sub: { ru: "−1.00 к сумме · обычно GOE −5", en: "−1.00 deduction · usually GOE −5" },
+  tap_hint: { ru: "Тап по элементу — детали · −/+ — быстрый GOE", en: "Tap element for details · −/+ for quick GOE" },
+  m_rep: { ru: "REP — повтор прыжка: базовая стоимость × 0.7", en: "REP — repeated jump: base value × 0.7" },
+  m_v: { ru: "V — вариация ребра (для вращений)", en: "V — edge variation (spins)" },
 
   protocol_doc: { ru: "Протокол проката", en: "Segment protocol" },
   doc_training: { ru: "тренировочный", en: "training" },

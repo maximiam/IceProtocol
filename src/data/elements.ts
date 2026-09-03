@@ -27,7 +27,13 @@ export const JUMP_GROUPS: Record<string, { group: string; jumps: ElemDef[] }> = 
   loop: { group: "Loop", jumps: [J("1Lo", "Single Loop", 0.5), J("2Lo", "Double Loop", 1.7), J("3Lo", "Triple Loop", 4.9), J("4Lo", "Quad Loop", 10.5)] },
   flip: { group: "Flip", jumps: [J("1F", "Single Flip", 0.5), J("2F", "Double Flip", 1.8), J("3F", "Triple Flip", 5.3), J("4F", "Quad Flip", 11.0)] },
   lutz: { group: "Lutz", jumps: [J("1Lz", "Single Lutz", 0.6), J("2Lz", "Double Lutz", 2.1), J("3Lz", "Triple Lutz", 5.9), J("4Lz", "Quad Lutz", 11.5)] },
+  euler: { group: "Euler", jumps: [J("1Eu", "Single Euler", 0.5), J("2Eu", "Double Euler", 1.7), J("3Eu", "Triple Euler", 3.4)] },
 };
+
+/** All singles jumps, flattened (for the combo builder) */
+export function allJumps(): { group: string; jumps: ElemDef[] }[] {
+  return Object.values(JUMP_GROUPS);
+}
 
 /**
  * Jump content allowed by ISU category:
@@ -46,13 +52,21 @@ export function filterJumps(disc: Discipline, jumps: ElemDef[]): ElemDef[] {
 export const SPIN_LEVEL_KEYS = ["B", "1", "2", "3", "4"];
 
 export const SINGLES_SPINS: LeveledDef[] = [
-  { code: "FSSp", name: "Flying Sit Spin", bases: [1.9, 2.3, 2.6, 3.0, 3.0] },
-  { code: "FCSSp", name: "Flying Camel Sit Spin", bases: [2.1, 2.4, 2.8, 3.2, 3.2] },
   { code: "CCoSp", name: "Combination Spin", bases: [2.0, 2.5, 3.0, 3.5, 3.5] },
   { code: "FCCoSp", name: "Flying Combination Spin", bases: [2.5, 3.0, 3.5, 4.0, 4.0] },
-  { code: "LSp", name: "Layback / Sideways Spin", bases: [1.9, 2.4, 2.7, 3.2, 3.2] },
+  { code: "FCoSp", name: "Flying Combination Spin", bases: [2.5, 3.0, 3.5, 4.0, 4.0] },
+  { code: "CoSp", name: "Combination Spin", bases: [2.0, 2.5, 3.0, 3.5, 3.5] },
+  { code: "FSSp", name: "Flying Sit Spin", bases: [1.9, 2.3, 2.6, 3.0, 3.0] },
+  { code: "FCSSp", name: "Flying Camel Sit Spin", bases: [2.1, 2.4, 2.8, 3.2, 3.2] },
+  { code: "CCSp", name: "Camel Combination Spin", bases: [2.5, 2.9, 3.2, 3.5, 3.5] },
   { code: "CSSp", name: "Camel Sit Spin", bases: [2.0, 2.3, 2.6, 3.0, 3.0] },
+  { code: "CSp", name: "Camel Spin", bases: [1.9, 2.3, 2.6, 3.0, 3.0] },
+  { code: "FCSp", name: "Flying Camel Spin", bases: [2.3, 2.7, 3.0, 3.2, 3.2] },
+  { code: "SSp", name: "Sit Spin", bases: [1.9, 2.3, 2.6, 3.0, 3.0] },
+  { code: "LSp", name: "Layback / Sideways Spin", bases: [1.9, 2.4, 2.7, 3.2, 3.2] },
   { code: "USp", name: "Upright Spin", bases: [1.5, 1.9, 2.3, 2.7, 2.7] },
+  { code: "FUSp", name: "Flying Upright Spin", bases: [2.0, 2.4, 2.7, 3.0, 3.0] },
+  { code: "FLSp", name: "Flying Layback Spin", bases: [2.4, 2.7, 3.0, 3.2, 3.2] },
 ];
 
 export const DANCE_SPINS: LeveledDef[] = [
@@ -74,13 +88,23 @@ export const STSQ: LeveledDef = { code: "StSq", name: "Step Sequence", bases: [1
 export const CHSQ: ElemDef[] = [J("ChSq1", "Choreo Sequence", 3.0)];
 
 export const DANCE_CHOREO: ElemDef[] = [
+  J("ChSt1", "Choreo Step Sequence", 3.3),
   J("ChSl1", "Choreo Sliding Movement", 3.0),
   J("ChSp1", "Choreo Spinning Movement", 3.0),
   J("ChTw1", "Choreo Twizzle Movement", 3.0),
 ];
 
+/* pattern dance type step sequence (ice dance) */
+export const PST: ElemDef[] = [
+  J("PSt1", "Pattern Step Sequence L1", 1.1),
+  J("PSt2", "Pattern Step Sequence L2", 1.9),
+  J("PSt3", "Pattern Step Sequence L3", 2.7),
+  J("PSt4", "Pattern Step Sequence L4", 3.3),
+];
+
 /* ---------------- pairs: twists & throws ---------------- */
 export const TWISTS: LeveledDef[] = [
+  { code: "1Tw", name: "Single Twist", bases: [1.0, 1.5, 2.0, 2.5, 3.0] },
   { code: "2Tw", name: "Double Twist", bases: [2.0, 2.5, 3.0, 3.5, 4.0] },
   { code: "3Tw", name: "Triple Twist", bases: [4.0, 5.0, 5.5, 6.0, 6.5] },
   { code: "4Tw", name: "Quad Twist", bases: [5.5, 6.5, 7.0, 7.5, 8.0] },
@@ -106,9 +130,27 @@ export const PAIRS_LIFTS: LeveledDef[] = [
   { code: "3Li", name: "Group 3 Lift", bases: [2.0, 3.0, 3.5, 4.0, 4.5] },
   { code: "4Li", name: "Group 4 Lift", bases: [2.0, 3.0, 3.5, 4.0, 4.5] },
   { code: "5ALi", name: "Axel Lasso Lift", bases: [2.0, 3.0, 3.5, 4.0, 4.5] },
+  { code: "5BLi", name: "Backward Lasso Lift", bases: [2.0, 3.0, 3.5, 4.0, 4.5] },
   { code: "5RLi", name: "Reverse Lasso Lift", bases: [2.0, 3.0, 3.5, 4.0, 4.5] },
   { code: "5SLi", name: "Star Lasso Lift", bases: [2.0, 3.0, 3.5, 4.0, 4.5] },
+  { code: "5TLi", name: "Toe Lasso Lift", bases: [2.0, 3.0, 3.5, 4.0, 4.5] },
 ];
+
+/* ---------------- catalog lookup (for in-place level editing) ---------------- */
+export function findLeveled(defCode: string): LeveledDef | null {
+  const cats = [
+    ...SINGLES_SPINS,
+    ...DANCE_SPINS,
+    ...PAIRS_SPINS,
+    ...TWISTS,
+    ...PAIRS_LIFTS,
+    ...DANCE_SHORT_LIFTS,
+    STSQ,
+  ];
+  return cats.find((c) => c.code === defCode) ?? null;
+}
+
+export const LEVEL_KEYS = ["B", "1", "2", "3", "4"];
 
 export const DANCE_SHORT_LIFTS: LeveledDef[] = [
   { code: "StaLi", name: "Stationary Lift", bases: [0, 1.1, 1.7, 2.3, 2.9] },

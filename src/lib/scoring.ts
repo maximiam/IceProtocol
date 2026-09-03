@@ -16,9 +16,15 @@ export interface SkElement {
   code: string; // "3Lz+3T", "CCoSp4", "5ALi4", "StSq3", "ChSq1"
   name: string;
   base: number; // raw base value (before marks)
-  flags: string[]; // "x" | "<" | "<<" | "q" | "!" | "e"
+  flags: string[]; // "x" | "<" | "<<" | "q" | "!" | "e" | "REP" | "V"
   goe: number; // -5..5
+  defCode?: string; // catalog code without level ("CCoSp", "5ALi")
+  levelIdx?: number; // 0=B, 1..4
+  fall?: boolean; // marked fall: −1 deduction
 }
+
+export const JUMP_FLAGS = ["x", "<", "<<", "q", "!", "e", "REP"];
+export const SPIN_FLAGS = ["V"];
 
 export interface Pcs {
   comp: number;
@@ -99,11 +105,12 @@ export function getLimits(disc: Discipline, seg: Segment, cat: Category): SlotSe
 
 export const SLOT_ORDER: ElemType[] = ["jump", "lift", "spin", "step", "choreo"];
 
-/** Effective base value after judge marks */
+/** Effective base value after judge marks (<<, <, REP, x) */
 export function elementBV(el: SkElement): number {
   let bv = el.base;
   if (el.flags.includes("<<")) bv *= 0.5;
   else if (el.flags.includes("<")) bv *= 0.7;
+  if (el.flags.includes("REP")) bv *= 0.7;
   if (el.flags.includes("x")) bv *= 1.1;
   return r2(bv);
 }
