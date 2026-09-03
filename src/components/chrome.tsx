@@ -1,10 +1,37 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { useApp, type View } from "../store";
 import { AnimatedNumber } from "./ui";
 import { IcBlade, IcCalendar, IcHome, IcJudge, IcMedal, IcSave, IcUser, IcUsers } from "./icons";
 
 /* ---------- ambient layers ---------- */
 const SPARK_COLORS = ["#6fe3ff", "#b79bff", "#7bf0c2", "#ffcf6b", "#6fe3ff"];
+
+/* light pool that trails the finger / cursor — the "liquid" in liquid glass */
+function LightFollower() {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    let raf = 0;
+    const move = (x: number, y: number) => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        el.style.setProperty("--lx", `${x}px`);
+        el.style.setProperty("--ly", `${y}px`);
+        el.style.opacity = "1";
+      });
+    };
+    const onPointer = (e: PointerEvent) => move(e.clientX, e.clientY);
+    window.addEventListener("pointermove", onPointer, { passive: true });
+    window.addEventListener("pointerdown", onPointer, { passive: true });
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("pointermove", onPointer);
+      window.removeEventListener("pointerdown", onPointer);
+    };
+  }, []);
+  return <div className="light-follower" ref={ref} />;
+}
 
 export function BgFx() {
   const sparks = useMemo(
@@ -23,6 +50,7 @@ export function BgFx() {
   return (
     <>
       <div className="bg-aurora" />
+      <LightFollower />
       <div className="sparks">
         {sparks.map((s) => (
           <span
