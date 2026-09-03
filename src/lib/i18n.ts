@@ -4,7 +4,7 @@ const S = {
   brand_sub: { ru: "фигурное катание · ISU 2025/26", en: "figure skating · ISU 2025/26" },
 
   nav_home: { ru: "Главная", en: "Home" },
-  nav_studio: { ru: "Судейская", en: "Judge" },
+  nav_studio: { ru: "Судейство", en: "Judging" },
   nav_skaters: { ru: "Спортсмены", en: "Skaters" },
   nav_season: { ru: "Сезон", en: "Season" },
   nav_profile: { ru: "Профиль", en: "Profile" },
@@ -27,7 +27,7 @@ const S = {
   new_protocol_sub: { ru: "Дисциплина и сегмент — как на настоящем старте", en: "Pick discipline and segment, like at a real event" },
   discipline: { ru: "Дисциплина", en: "Discipline" },
   segment: { ru: "Сегмент", en: "Segment" },
-  open_studio: { ru: "Открыть судейскую", en: "Open judging desk" },
+  open_studio: { ru: "Открыть судейство", en: "Open judging desk" },
 
   disc_men: { ru: "Мужчины", en: "Men" },
   disc_jmen: { ru: "Юноши", en: "Junior Men" },
@@ -65,7 +65,7 @@ const S = {
 
   recent: { ru: "Последние протоколы", en: "Recent protocols" },
   no_recent: { ru: "Пока нет протоколов", en: "No protocols yet" },
-  no_recent_sub: { ru: "Оцените первый прокат в судейской", en: "Judge your first program in the studio" },
+  no_recent_sub: { ru: "Оцените первый прокат в разделе «Судейство»", en: "Judge your first program in Judging" },
 
   athlete: { ru: "Спортсмен", en: "Skater" },
   athlete_ph: { ru: "Имя и фамилия", en: "Full name" },
