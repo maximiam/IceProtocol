@@ -169,7 +169,7 @@ const S = {
   cleared_toast: { ru: "Все протоколы удалены", en: "All protocols deleted" },
   local_judge: { ru: "локальный профиль", en: "local profile" },
   best_total: { ru: "лучшая сумма", en: "best total" },
-  version: { ru: "FS Judge 2.0 · SOV ISU 2025/26 · тренировочный инструмент", en: "FS Judge 2.0 · ISU SOV 2025/26 · training tool" },
+  version: { ru: "FS Judge 2.1 · SOV ISU 2025/26 · тренировочный инструмент", en: "FS Judge 2.1 · ISU SOV 2025/26 · training tool" },
 
   protocol_doc: { ru: "Протокол проката", en: "Segment protocol" },
   doc_training: { ru: "тренировочный", en: "training" },
