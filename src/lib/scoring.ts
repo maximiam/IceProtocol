@@ -174,6 +174,20 @@ export function segKey(d: Discipline, s: Segment): "seg_sp" | "seg_fs" | "seg_rd
   return s === "sp" ? "seg_sp" : "seg_fs";
 }
 
+/** Official ISU English segment label, e.g. "MEN SHORT PROGRAM" */
+export function officialSegmentLabel(d: Discipline, s: Segment): string {
+  const disc =
+    d === "men" || d === "jmen"
+      ? "MEN"
+      : d === "ladies" || d === "jladies"
+        ? "LADIES"
+        : d === "pairs"
+          ? "PAIRS"
+          : "ICE DANCE";
+  if (d === "dance") return `${disc} ${s === "sp" ? "RHYTHM DANCE" : "FREE DANCE"}`;
+  return `${disc} ${s === "sp" ? "SHORT PROGRAM" : "FREE SKATING"}`;
+}
+
 export function catKey(c: Category): "cat_senior" | "cat_junior" {
   return c === "junior" ? "cat_junior" : "cat_senior";
 }

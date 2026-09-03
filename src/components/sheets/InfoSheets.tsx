@@ -1,7 +1,7 @@
 import { Sheet } from "../ui";
 import { useApp } from "../../store";
 import type { Protocol } from "../../lib/scoring";
-import { catKey, discKey, elementBV, elementScore, factorGroup, fmt, goeValue, PCS_FACTOR, segKey } from "../../lib/scoring";
+import { catKey, discKey, elementBV, elementScore, factorGroup, fmt, goeValue, officialSegmentLabel, PCS_FACTOR, segKey } from "../../lib/scoring";
 import type { Skater } from "../../data/skaters";
 import { IcCheck, IcCopy, IcShare } from "../icons";
 
@@ -212,24 +212,40 @@ export function RulesSheet({ open, onClose }: { open: boolean; onClose: () => vo
   );
 }
 
-/* ================= protocol document ================= */
-export function protocolToText(p: Protocol, lang: "ru" | "en", discLabel: string, segLabel: string, catLabel: string): string {
-  const date = new Date(p.createdAt).toLocaleDateString(lang === "ru" ? "ru-RU" : "en-GB");
-  const lines = [
-    `ICEPROTOCOL — ${p.skaterFlag ? p.skaterFlag + " " : ""}${p.skater || (lang === "ru" ? "без имени" : "unnamed")}${p.skaterCountry ? ` (${p.skaterCountry})` : ""}`,
-    `${discLabel} · ${catLabel} · ${segLabel}`,
-    ...(p.competition ? [`🏆 ${p.competition}`] : []),
-    date,
-    "—".repeat(28),
+/* ================= protocol document (official ISU layout) ================= */
+export function protocolToText(p: Protocol): string {
+  const event = (p.competition || "ICEPROTOCOL").toUpperCase();
+  const seg = officialSegmentLabel(p.discipline, p.segment);
+  const name = p.skater || "—";
+  const nation = p.skaterCountry ? ` (${p.skaterCountry})` : "";
+  const sgn = (n: number) => (n > 0 ? `+${fmt(n)}` : fmt(n));
+  const totalBV = p.elements.reduce((s, el) => s + elementBV(el), 0);
+  const factor = PCS_FACTOR[factorGroup(p.discipline)][p.segment];
+  const lines: string[] = [
+    event,
+    "JUDGES DETAILS PER SKATER",
+    seg,
+    "",
+    `${p.skaterFlag ? p.skaterFlag + " " : ""}${name}${nation}`,
+    "".padEnd(64, "—"),
+    "#  Executed Elements      Base Value   GOE    J1   Score of Panel",
     ...p.elements.map((el, i) => {
-      const flags = el.flags.length ? ` [${el.flags.join(" ")}]` : "";
-      const g = goeValue(el);
-      return `${String(i + 1).padStart(2, "0")} ${el.code}${flags}  BV ${fmt(elementBV(el))}  GOE ${g >= 0 ? "+" : ""}${fmt(g)}  →  ${fmt(elementScore(el))}`;
+      const code = el.code + (el.flags.length ? " " + el.flags.join(" ") : "");
+      return `${String(i + 1).padStart(2)} ${code.padEnd(22)} ${fmt(elementBV(el)).padStart(8)} ${sgn(goeValue(el)).padStart(7)} ${String(el.goe).padStart(3)}   ${fmt(elementScore(el)).padStart(8)}`;
     }),
-    "—".repeat(28),
-    `PCS: ${fmt(p.pcs.comp)} / ${fmt(p.pcs.pres)} / ${fmt(p.pcs.ss)}  →  ${fmt(p.pcsScore)}`,
-    `TES ${fmt(p.tes)} · PCS ${fmt(p.pcsScore)} · DED −${fmt(p.deductions)}`,
-    `TOTAL: ${fmt(p.total)}`,
+    "".padEnd(64, "—"),
+    `   ${"Total Element Score".padEnd(22)} ${fmt(totalBV).padStart(8)} ${"".padStart(7)} ${"".padStart(3)}   ${fmt(p.tes).padStart(8)}`,
+    "",
+    "Program Components       Factor    J1   Score of Panel",
+    `   ${"Composition".padEnd(22)} ${factor.toFixed(2).padStart(6)} ${fmt(p.pcs.comp).padStart(5)}   ${fmt(p.pcs.comp).padStart(8)}`,
+    `   ${"Presentation".padEnd(22)} ${factor.toFixed(2).padStart(6)} ${fmt(p.pcs.pres).padStart(5)}   ${fmt(p.pcs.pres).padStart(8)}`,
+    `   ${"Skating Skills".padEnd(22)} ${factor.toFixed(2).padStart(6)} ${fmt(p.pcs.ss).padStart(5)}   ${fmt(p.pcs.ss).padStart(8)}`,
+    "".padEnd(64, "—"),
+    `   Total Program Component Score (Factored)${"".padStart(11)} ${fmt(p.pcsScore).padStart(8)}`,
+    "",
+    `   Total Deduction${"".padStart(38)} ${fmt(p.deductions).padStart(8)}`,
+    "".padEnd(64, "—"),
+    `   TOTAL SEGMENT SCORE${"".padStart(34)} ${fmt(p.total).padStart(8)}`,
   ];
   return lines.join("\n");
 }
@@ -241,6 +257,7 @@ export function ProtocolSheet({ protocol, onClose }: { protocol: Protocol | null
   const discLabel = t(discKey(protocol.discipline));
   const segLabel = t(segKey(protocol.discipline, protocol.segment));
   const catLabel = t(catKey(protocol.category ?? "senior"));
+  const factor = PCS_FACTOR[factorGroup(protocol.discipline)][protocol.segment];
   const date = new Date(protocol.createdAt).toLocaleDateString(lang === "ru" ? "ru-RU" : "en-GB", {
     day: "numeric",
     month: "long",
@@ -248,7 +265,7 @@ export function ProtocolSheet({ protocol, onClose }: { protocol: Protocol | null
   });
 
   const copy = async () => {
-    const text = protocolToText(protocol, lang, discLabel, segLabel, catLabel);
+    const text = protocolToText(protocol);
     try {
       await navigator.clipboard.writeText(text);
       showToast(t("copied"));
@@ -264,7 +281,7 @@ export function ProtocolSheet({ protocol, onClose }: { protocol: Protocol | null
   };
 
   const share = async () => {
-    const text = protocolToText(protocol, lang, discLabel, segLabel, catLabel);
+    const text = protocolToText(protocol);
     try {
       if (navigator.share) {
         await navigator.share({ text });
@@ -278,25 +295,54 @@ export function ProtocolSheet({ protocol, onClose }: { protocol: Protocol | null
 
   return (
     <Sheet open={!!protocol} onClose={onClose} title={t("protocol_doc")} sub={`${catLabel} · ${discLabel} · ${segLabel}`}>
-      <div className="doc">
-        <div className="doc-head">
-          <span>IceProtocol · {t("doc_training")}</span>
-          <span>{date}</span>
+      <div className="isu">
+        {/* official header */}
+        <div className="isu-event">{protocol.competition || "ICEPROTOCOL"}</div>
+        <div className="isu-section">Judges Details Per Skater</div>
+        <div className="isu-disc">{officialSegmentLabel(protocol.discipline, protocol.segment)}</div>
+        <hr className="isu-rule" />
+        <hr className="isu-rule thin" />
+
+        {/* skater identity + segment totals */}
+        <div className="isu-skater">
+          <div style={{ minWidth: 0 }}>
+            <div className="isu-name">
+              {protocol.skaterFlag && <span style={{ marginRight: 5 }}>{protocol.skaterFlag}</span>}
+              {protocol.skater || "—"}
+            </div>
+            <div className="isu-nation">{protocol.skaterCountry || ""}</div>
+            <div className="isu-meta">{date}</div>
+          </div>
+          <div className="isu-totals">
+            <div>
+              <span>Total Segment Score</span>
+              <b>{fmt(protocol.total)}</b>
+            </div>
+            <div>
+              <span>Total Element Score</span>
+              <b>{fmt(protocol.tes)}</b>
+            </div>
+            <div>
+              <span>Total Program Component Score (Factored)</span>
+              <b>{fmt(protocol.pcsScore)}</b>
+            </div>
+            <div>
+              <span>Total Deduction</span>
+              <b>{fmt(protocol.deductions)}</b>
+            </div>
+          </div>
         </div>
-        {protocol.competition && <div style={{ fontWeight: 700, marginBottom: 2 }}>🏆 {protocol.competition}</div>}
-        <div style={{ fontWeight: 600, marginBottom: 8 }}>
-          {protocol.skaterFlag && <span>{protocol.skaterFlag} </span>}
-          {protocol.skater || "—"}
-          {protocol.skaterCountry ? ` · ${protocol.skaterCountry}` : ""}
-        </div>
-        <table>
+
+        {/* executed elements */}
+        <table className="isu-table">
           <thead>
             <tr>
-              <th>#</th>
-              <th style={{ textAlign: "left" }}>{t("elements_title")}</th>
-              <th>BV</th>
-              <th>GOE</th>
-              <th>Pts</th>
+              <th style={{ width: 24 }}>#</th>
+              <th className="left">Executed Elements</th>
+              <th className="num">Base Value</th>
+              <th className="num">GOE</th>
+              <th>J1</th>
+              <th className="num">Score of Panel</th>
             </tr>
           </thead>
           <tbody>
@@ -307,54 +353,77 @@ export function ProtocolSheet({ protocol, onClose }: { protocol: Protocol | null
                   <td>{i + 1}</td>
                   <td className="left">
                     {el.code}
-                    {el.flags.length > 0 && <span style={{ color: "#a06a00", fontWeight: 700 }}> {el.flags.join(" ")}</span>}
+                    {el.flags.length > 0 && <span style={{ color: "#8a5a00", fontWeight: 700 }}> {el.flags.join(" ")}</span>}
                   </td>
-                  <td>{fmt(elementBV(el))}</td>
-                  <td style={{ color: g > 0 ? "#0c7a4d" : g < 0 ? "#b3271e" : undefined }}>
-                    {g > 0 ? "+" : ""}
-                    {fmt(g)}
-                  </td>
-                  <td style={{ fontWeight: 700 }}>{fmt(elementScore(el))}</td>
+                  <td className="num">{fmt(elementBV(el))}</td>
+                  <td className="num">{g > 0 ? `+${fmt(g)}` : fmt(g)}</td>
+                  <td>{el.goe > 0 ? `+${el.goe}` : el.goe}</td>
+                  <td className="num" style={{ fontWeight: 700 }}>{fmt(elementScore(el))}</td>
                 </tr>
               );
             })}
             {protocol.elements.length === 0 && (
               <tr>
-                <td colSpan={5}>—</td>
+                <td colSpan={6} className="left" style={{ color: "#666" }}>—</td>
               </tr>
             )}
+            <tr className="total-row">
+              <td colSpan={2} className="left">{t("tes")} · Total Element Score</td>
+              <td className="num">{fmt(protocol.elements.reduce((s, el) => s + elementBV(el), 0))}</td>
+              <td colSpan={2}></td>
+              <td className="num">{fmt(protocol.tes)}</td>
+            </tr>
           </tbody>
         </table>
-        <table style={{ marginTop: 8 }}>
+
+        {/* program components */}
+        <div className="isu-cap">Program Components</div>
+        <table className="isu-table" style={{ marginTop: 2 }}>
+          <thead>
+            <tr>
+              <th className="left">Component</th>
+              <th>Factor</th>
+              <th>J1</th>
+              <th className="num">Score of Panel</th>
+            </tr>
+          </thead>
           <tbody>
             <tr>
-              <td className="left">{t("pcs_comp")}</td>
+              <td className="left">Composition</td>
+              <td>{factor.toFixed(2)}</td>
               <td>{fmt(protocol.pcs.comp)}</td>
-              <td className="left">{t("pcs_pres")}</td>
+              <td className="num">{fmt(protocol.pcs.comp)}</td>
+            </tr>
+            <tr>
+              <td className="left">Presentation</td>
+              <td>{factor.toFixed(2)}</td>
               <td>{fmt(protocol.pcs.pres)}</td>
-              <td className="left">{t("pcs_ss")}</td>
+              <td className="num">{fmt(protocol.pcs.pres)}</td>
+            </tr>
+            <tr>
+              <td className="left">Skating Skills</td>
+              <td>{factor.toFixed(2)}</td>
               <td>{fmt(protocol.pcs.ss)}</td>
+              <td className="num">{fmt(protocol.pcs.ss)}</td>
             </tr>
-            <tr>
-              <td className="left" colSpan={4}>
-                {t("pcs_factor")} × {PCS_FACTOR[factorGroup(protocol.discipline)][protocol.segment].toFixed(2)}
-              </td>
-              <td className="left">{t("pcs_score")}</td>
-              <td style={{ fontWeight: 800 }}>{fmt(protocol.pcsScore)}</td>
-            </tr>
-            <tr>
-              <td className="left" colSpan={4}>
-                TES
-              </td>
-              <td className="left">{t("ded")}</td>
-              <td style={{ fontWeight: 800 }}>−{fmt(protocol.deductions)}</td>
+            <tr className="total-row">
+              <td colSpan={3} className="left">Total Program Component Score (Factored)</td>
+              <td className="num">{fmt(protocol.pcsScore)}</td>
             </tr>
           </tbody>
         </table>
-        <div className="doc-total">
-          {t("total")}: {fmt(protocol.total)}
+
+        {/* deductions + grand total */}
+        <div className="isu-grand">
+          <span>Total Deduction</span>
+          <b>−{fmt(protocol.deductions)}</b>
         </div>
-        <div className="doc-note">FS Judge · ISU SOV 2025/26</div>
+        <div className="isu-grand" style={{ marginTop: 4 }}>
+          <span>Total Segment Score</span>
+          <b>{fmt(protocol.total)}</b>
+        </div>
+
+        <div className="isu-foot">IceProtocol · Training document · ISU Scale of Values 2025/26 · 1 judge (J1)</div>
       </div>
 
       <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
