@@ -3,6 +3,7 @@ import { useApp } from "../store";
 import { Telegram } from "../lib/telegram";
 import type { Protocol } from "../lib/scoring";
 import { catKey, discKey, fmt, segKey } from "../lib/scoring";
+import { APP_NAME, APP_VERSION } from "../lib/version";
 import { Reveal, SectionLabel, Toggle } from "../components/ui";
 import { ProtocolSheet } from "../components/sheets/InfoSheets";
 import { IcChevR, IcJudge, IcTrash } from "../components/icons";
@@ -166,7 +167,9 @@ export function Profile() {
         )}
       </Reveal>
 
-      <p style={{ textAlign: "center", fontSize: 10.5, color: "var(--mist-dim)", margin: "26px 0 8px", lineHeight: 1.6 }}>{t("version")}</p>
+      <p style={{ textAlign: "center", fontSize: 10.5, color: "var(--mist-dim)", margin: "26px 0 8px", lineHeight: 1.6 }}>
+        {APP_NAME} {APP_VERSION}
+      </p>
 
       <ProtocolSheet protocol={selProto} onClose={() => setSelProto(null)} />
     </div>

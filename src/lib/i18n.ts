@@ -179,8 +179,6 @@ const S = {
   cleared_toast: { ru: "Все протоколы удалены", en: "All protocols deleted" },
   local_judge: { ru: "локальный профиль", en: "local profile" },
   best_total: { ru: "лучшая сумма", en: "best total" },
-  version: { ru: "IceProtocol 3.1 · SOV ISU 2025/26 · тренировочный инструмент", en: "IceProtocol 3.1 · ISU SOV 2025/26 · training tool" },
-
   lvl: { ru: "Уровень", en: "Level" },
   replace_elem: { ru: "Заменить элемент", en: "Replace element" },
   combo_sel: { ru: "Каскад", en: "Combo" },
