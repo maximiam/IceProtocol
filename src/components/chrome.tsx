@@ -65,7 +65,6 @@ export function TopBar() {
         </div>
       </button>
       <div className="top-actions">
-        <span className="ver-pill">v2.2</span>
         <button
           className="icon-btn"
           type="button"

@@ -1,12 +1,11 @@
 import { useMemo, useState } from "react";
 import { useApp, useNow } from "../store";
 import { EVENTS } from "../data/skaters";
-import type { Discipline, Protocol, Segment } from "../lib/scoring";
-import { DISCIPLINES, discKey, fmt, segKey } from "../lib/scoring";
+import type { Category, Discipline, Protocol, Segment } from "../lib/scoring";
+import { ALL_DISCIPLINES, catKey, categoryOf, discKey, fmt, segKey, SINGLES } from "../lib/scoring";
 import { Chip, Reveal, SectionLabel } from "../components/ui";
 import { ProtocolSheet, RulesSheet } from "../components/sheets/InfoSheets";
 import { JudgesBoard } from "./Judges";
-import { Telegram } from "../lib/telegram";
 import { IcBook, IcCalendar, IcChevR, IcJudge, IcMedal, IcUsers } from "../components/icons";
 
 const pad = (n: number) => String(Math.max(0, n)).padStart(2, "0");
@@ -18,6 +17,9 @@ export function Home() {
   const [sel, setSel] = useState<Protocol | null>(null);
   const [disc, setDisc] = useState<Discipline>("men");
   const [seg, setSeg] = useState<Segment>("sp");
+  const [cat, setCat] = useState<Category>("senior");
+
+  const effCat = categoryOf(disc, cat);
 
   const next = useMemo(
     () =>
@@ -26,10 +28,6 @@ export function Home() {
         .sort((a, b) => a.start.localeCompare(b.start))[0] ?? null,
     [now],
   );
-
-  const hour = new Date(now).getHours();
-  const greetKey = hour < 5 ? "g_night" : hour < 12 ? "g_morning" : hour < 18 ? "g_afternoon" : "g_evening";
-  const userName = Telegram.user?.first_name ?? "";
 
   const allEls = protocols.reduce((s, p) => s + p.elements.length, 0);
   const avgGoe = allEls ? protocols.reduce((s, p) => s + p.elements.reduce((a, e) => a + e.goe, 0), 0) / allEls : null;
@@ -47,7 +45,7 @@ export function Home() {
 
   const openStudio = () => {
     buzz("medium");
-    patchDraft({ discipline: disc, segment: seg });
+    patchDraft({ discipline: disc, segment: seg, category: effCat });
     setView("studio");
   };
 
@@ -58,18 +56,8 @@ export function Home() {
 
   return (
     <div>
-      <Reveal>
-        <h1 className="h1">
-          {t(greetKey)}
-          {userName ? `, ${userName}` : ""} <em>⛸</em>
-        </h1>
-        <p className="sub">
-          FS Judge · {t("judge")} · ISU 2025/26
-        </p>
-      </Reveal>
-
       {/* next start countdown */}
-      <Reveal delay={40}>
+      <Reveal>
         <div className="glass" style={{ padding: "16px 16px 18px", position: "relative", overflow: "hidden" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
             <span className="badge cyan">{t("next_start")}</span>
@@ -114,15 +102,34 @@ export function Home() {
       <Reveal delay={80}>
         <div className="glass" style={{ padding: "16px 16px 15px", marginTop: 12 }}>
           <b style={{ fontFamily: "var(--font-display)", fontSize: 16.5, fontWeight: 600 }}>{t("new_protocol")}</b>
-          <div style={{ fontSize: 12, color: "var(--mist-dim)", marginTop: 2, marginBottom: 12 }}>{t("new_protocol_sub")}</div>
+          <div style={{ fontSize: 12, color: "var(--mist-dim)", marginTop: 2, marginBottom: 12 }}>{t("cat_note")}</div>
+
           <div className="field-label">{t("discipline")}</div>
           <div className="chip-row" style={{ marginBottom: 10 }}>
-            {DISCIPLINES.map((d) => (
+            {ALL_DISCIPLINES.map((d) => (
               <Chip key={d} active={disc === d} onClick={() => { setDisc(d); buzz(); }}>
                 {t(discKey(d))}
               </Chip>
             ))}
           </div>
+
+          <div className="field-label">
+            {t("cat_label")} · <span style={{ color: "var(--cyan)" }}>{t(catKey(effCat))}</span>
+          </div>
+          {SINGLES.includes(disc) ? (
+            <div className="glass glass-tight" style={{ padding: "9px 13px", fontSize: 12, color: "var(--mist)", marginBottom: 10, lineHeight: 1.5 }}>
+              {t(catKey(effCat))} — {t(discKey(disc))}
+            </div>
+          ) : (
+            <div className="seg-toggle" style={{ marginBottom: 10 }}>
+              {(["senior", "junior"] as Category[]).map((c) => (
+                <button key={c} type="button" className={effCat === c ? "active" : ""} onClick={() => { setCat(c); buzz(); }}>
+                  {t(catKey(c))}
+                </button>
+              ))}
+            </div>
+          )}
+
           <div className="field-label">{t("segment")}</div>
           <div className="seg-toggle" style={{ marginBottom: 12 }}>
             {(["sp", "fs"] as Segment[]).map((s) => (
@@ -131,6 +138,7 @@ export function Home() {
               </button>
             ))}
           </div>
+
           <button className="btn" type="button" onClick={openStudio}>
             <IcJudge size={16} />
             {t("open_studio")}
@@ -204,7 +212,7 @@ export function Home() {
             <div className="meta">
               <b>{p.skater || "—"}</b>
               <span>
-                {t(discKey(p.discipline))} · {t(segKey(p.discipline, p.segment))} ·{" "}
+                {t(discKey(p.discipline))} · {t(catKey(p.category ?? "senior"))} ·{" "}
                 {new Date(p.createdAt).toLocaleDateString(loc, { day: "numeric", month: "short" })}
               </span>
             </div>

@@ -1,8 +1,8 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import type { Lang, StrKey } from "./lib/i18n";
 import { tr } from "./lib/i18n";
-import type { Discipline, Deds, Pcs, Protocol, Segment, SkElement } from "./lib/scoring";
-import { computeTotals, uid } from "./lib/scoring";
+import type { Category, Discipline, Deds, Pcs, Protocol, Segment, SkElement } from "./lib/scoring";
+import { categoryOf, computeTotals, uid } from "./lib/scoring";
 import { Telegram } from "./lib/telegram";
 
 export type View = "home" | "studio" | "skaters" | "season" | "profile";
@@ -11,6 +11,7 @@ export interface Draft {
   skater: string;
   discipline: Discipline;
   segment: Segment;
+  category: Category;
   elements: SkElement[];
   pcs: Pcs;
   deds: Deds;
@@ -20,6 +21,7 @@ const EMPTY_DRAFT: Draft = {
   skater: "",
   discipline: "men",
   segment: "sp",
+  category: "senior",
   elements: [],
   pcs: { comp: 0, pres: 0, ss: 0 },
   deds: { falls: 0, time: false, costume: false, music: false },
@@ -142,7 +144,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     (id: string) => setDraft((d) => ({ ...d, elements: d.elements.filter((e) => e.id !== id) })),
     [],
   );
-  const resetDraft = useCallback(() => setDraft((d) => ({ ...EMPTY_DRAFT, discipline: d.discipline, segment: d.segment })), []);
+  const resetDraft = useCallback(
+    () => setDraft((d) => ({ ...EMPTY_DRAFT, discipline: d.discipline, segment: d.segment, category: d.category })),
+    [],
+  );
 
   const saveProtocol = useCallback((): Protocol => {
     const totals = computeTotals(draft.elements, draft.pcs, draft.deds, draft.discipline, draft.segment);
@@ -152,6 +157,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       skater: draft.skater.trim(),
       discipline: draft.discipline,
       segment: draft.segment,
+      category: categoryOf(draft.discipline, draft.category),
       elements: draft.elements,
       pcs: draft.pcs,
       deds: draft.deds,

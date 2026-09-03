@@ -1,7 +1,7 @@
 import { Sheet } from "../ui";
 import { useApp } from "../../store";
 import type { Protocol } from "../../lib/scoring";
-import { discKey, elementBV, elementScore, fmt, goeValue, PCS_FACTOR, segKey } from "../../lib/scoring";
+import { catKey, discKey, elementBV, elementScore, factorGroup, fmt, goeValue, PCS_FACTOR, segKey } from "../../lib/scoring";
 import type { Skater } from "../../data/skaters";
 import { IcCheck, IcCopy, IcShare } from "../icons";
 
@@ -10,7 +10,11 @@ export function RulesSheet({ open, onClose }: { open: boolean; onClose: () => vo
   const { t, lang } = useApp();
   const goeRow = [5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5];
   const marks = ["m_x", "m_lt", "m_dg", "m_q", "m_att", "m_e"] as const;
-  const factorRows: { d: "men" | "ladies" | "pairs" | "dance" }[] = [{ d: "men" }, { d: "ladies" }, { d: "pairs" }, { d: "dance" }];
+  const factorRows: { label: string; d: "men" | "ladies" | "dance" }[] = [
+    { label: `${t("disc_men")} · ${t("disc_jmen")}`, d: "men" },
+    { label: `${t("disc_ladies")} · ${t("disc_jladies")} · ${t("disc_pairs")}`, d: "ladies" },
+    { label: t("disc_dance"), d: "dance" },
+  ];
 
   return (
     <Sheet open={open} onClose={onClose} title={t("rules_title")} sub={t("picker_sub")}>
@@ -76,11 +80,11 @@ export function RulesSheet({ open, onClose }: { open: boolean; onClose: () => vo
 }
 
 /* ================= protocol document ================= */
-export function protocolToText(p: Protocol, lang: "ru" | "en", discLabel: string, segLabel: string): string {
+export function protocolToText(p: Protocol, lang: "ru" | "en", discLabel: string, segLabel: string, catLabel: string): string {
   const date = new Date(p.createdAt).toLocaleDateString(lang === "ru" ? "ru-RU" : "en-GB");
   const lines = [
     `FS JUDGE — ${p.skater || (lang === "ru" ? "без имени" : "unnamed")}`,
-    `${discLabel} · ${segLabel} · ${date}`,
+    `${discLabel} · ${catLabel} · ${segLabel} · ${date}`,
     "—".repeat(28),
     ...p.elements.map((el, i) => {
       const flags = el.flags.length ? ` [${el.flags.join(" ")}]` : "";
@@ -101,6 +105,7 @@ export function ProtocolSheet({ protocol, onClose }: { protocol: Protocol | null
 
   const discLabel = t(discKey(protocol.discipline));
   const segLabel = t(segKey(protocol.discipline, protocol.segment));
+  const catLabel = t(catKey(protocol.category ?? "senior"));
   const date = new Date(protocol.createdAt).toLocaleDateString(lang === "ru" ? "ru-RU" : "en-GB", {
     day: "numeric",
     month: "long",
@@ -108,7 +113,7 @@ export function ProtocolSheet({ protocol, onClose }: { protocol: Protocol | null
   });
 
   const copy = async () => {
-    const text = protocolToText(protocol, lang, discLabel, segLabel);
+    const text = protocolToText(protocol, lang, discLabel, segLabel, catLabel);
     try {
       await navigator.clipboard.writeText(text);
       showToast(t("copied"));
@@ -124,7 +129,7 @@ export function ProtocolSheet({ protocol, onClose }: { protocol: Protocol | null
   };
 
   const share = async () => {
-    const text = protocolToText(protocol, lang, discLabel, segLabel);
+    const text = protocolToText(protocol, lang, discLabel, segLabel, catLabel);
     try {
       if (navigator.share) {
         await navigator.share({ text });
@@ -191,7 +196,7 @@ export function ProtocolSheet({ protocol, onClose }: { protocol: Protocol | null
             </tr>
             <tr>
               <td className="left" colSpan={4}>
-                {t("pcs_factor")} × {PCS_FACTOR[protocol.discipline][protocol.segment].toFixed(2)}
+                {t("pcs_factor")} × {PCS_FACTOR[factorGroup(protocol.discipline)][protocol.segment].toFixed(2)}
               </td>
               <td className="left">{t("pcs_score")}</td>
               <td style={{ fontWeight: 800 }}>{fmt(protocol.pcsScore)}</td>
