@@ -183,7 +183,7 @@ const S = {
   cleared_toast: { ru: "Все протоколы удалены", en: "All protocols deleted" },
   local_judge: { ru: "локальный профиль", en: "local profile" },
   best_total: { ru: "лучшая сумма", en: "best total" },
-  version: { ru: "FS Judge 3.0 · SOV ISU 2025/26 · тренировочный инструмент", en: "FS Judge 3.0 · ISU SOV 2025/26 · training tool" },
+  version: { ru: "IceProtocol 3.1 · SOV ISU 2025/26 · тренировочный инструмент", en: "IceProtocol 3.1 · ISU SOV 2025/26 · training tool" },
 
   protocol_doc: { ru: "Протокол проката", en: "Segment protocol" },
   doc_training: { ru: "тренировочный", en: "training" },
@@ -220,6 +220,29 @@ const S = {
   isu_registry: { ru: "Вся база фигуристов — на isu.org", en: "Full skater registry — isu.org" },
   open_on_isu: { ru: "Профиль ISU", en: "ISU profile" },
   pb_note: { ru: "Личные рекорды по данным isu.org", en: "Personal bests per isu.org" },
+
+  tab_judges: { ru: "Рейтинг", en: "Ranks" },
+  judges_sub: { ru: "Очки начисляются за каждый оценённый прокат и элемент", en: "Points are awarded for every judged program and element" },
+  comp_label: { ru: "Соревнование", en: "Competition" },
+  comp_pick: { ru: "Выбрать турнир", en: "Choose event" },
+  pick_skater: { ru: "Выбрать спортсмена", en: "Pick a skater" },
+  pick_skater_sub: { ru: "Из базы ISU или вручную, со страной и флагом", en: "From the ISU base or manually, with country and flag" },
+  comp_pick_sub: { ru: "Из календаря ISU или своё название", en: "From the ISU calendar or a custom name" },
+  comp_custom: { ru: "Своё название", en: "Custom name" },
+  comp_custom_ph: { ru: "Например: Кубок города 2026", en: "e.g. City Cup 2026" },
+  comp_use: { ru: "Использовать", en: "Use" },
+  comp_official: { ru: "Официальный календарь ISU", en: "Official ISU calendar" },
+  comp_none: { ru: "Соревнование не выбрано", en: "No competition selected" },
+  skater_from_isu: { ru: "База спортсменов ISU", en: "ISU skater base" },
+  manual_skater: { ru: "Ручной ввод", en: "Manual entry" },
+  country_label: { ru: "Страна", en: "Country" },
+  country_ph: { ru: "Выберите страну…", en: "Select country…" },
+  add_athlete: { ru: "Добавить спортсмена", en: "Add skater" },
+  athlete_added: { ru: "Спортсмен добавлен", en: "Skater added" },
+  need_name: { ru: "Укажите имя спортсмена", en: "Enter the skater's name" },
+  need_country: { ru: "Укажите страну спортсмена", en: "Select the skater's country" },
+  rules_structure: { ru: "Структура программ", en: "Program structure" },
+  rules_structure_sub: { ru: "Обязательные элементы и время — взрослые и юниоры, все дисциплины", en: "Required content and timing — seniors & juniors, all disciplines" },
 } as const;
 
 export type StrKey = keyof typeof S;

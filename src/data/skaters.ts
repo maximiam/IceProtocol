@@ -1,5 +1,60 @@
 import type { Discipline } from "../lib/scoring";
 
+export interface Country {
+  code: string;
+  flag: string;
+  en: string;
+  ru: string;
+}
+
+/* ISU member federations — for manual athlete entry */
+export const COUNTRIES: Country[] = [
+  { code: "JPN", flag: "🇯🇵", en: "Japan", ru: "Япония" },
+  { code: "USA", flag: "🇺🇸", en: "United States", ru: "США" },
+  { code: "CAN", flag: "🇨🇦", en: "Canada", ru: "Канада" },
+  { code: "FRA", flag: "🇫🇷", en: "France", ru: "Франция" },
+  { code: "ITA", flag: "🇮🇹", en: "Italy", ru: "Италия" },
+  { code: "GER", flag: "🇩🇪", en: "Germany", ru: "Германия" },
+  { code: "GBR", flag: "🇬🇧", en: "Great Britain", ru: "Великобритания" },
+  { code: "ESP", flag: "🇪🇸", en: "Spain", ru: "Испания" },
+  { code: "SUI", flag: "🇨🇭", en: "Switzerland", ru: "Швейцария" },
+  { code: "AUT", flag: "🇦🇹", en: "Austria", ru: "Австрия" },
+  { code: "NED", flag: "🇳🇱", en: "Netherlands", ru: "Нидерланды" },
+  { code: "BEL", flag: "🇧🇪", en: "Belgium", ru: "Бельгия" },
+  { code: "SWE", flag: "🇸🇪", en: "Sweden", ru: "Швеция" },
+  { code: "FIN", flag: "🇫🇮", en: "Finland", ru: "Финляндия" },
+  { code: "NOR", flag: "🇳🇴", en: "Norway", ru: "Норвегия" },
+  { code: "DEN", flag: "🇩🇰", en: "Denmark", ru: "Дания" },
+  { code: "POL", flag: "🇵🇱", en: "Poland", ru: "Польша" },
+  { code: "CZE", flag: "🇨🇿", en: "Czechia", ru: "Чехия" },
+  { code: "SVK", flag: "🇸🇰", en: "Slovakia", ru: "Словакия" },
+  { code: "HUN", flag: "🇭🇺", en: "Hungary", ru: "Венгрия" },
+  { code: "EST", flag: "🇪🇪", en: "Estonia", ru: "Эстония" },
+  { code: "LAT", flag: "🇱🇻", en: "Latvia", ru: "Латвия" },
+  { code: "LTU", flag: "🇱🇹", en: "Lithuania", ru: "Литва" },
+  { code: "GEO", flag: "🇬🇪", en: "Georgia", ru: "Грузия" },
+  { code: "ARM", flag: "🇦🇲", en: "Armenia", ru: "Армения" },
+  { code: "AZE", flag: "🇦🇿", en: "Azerbaijan", ru: "Азербайджан" },
+  { code: "KAZ", flag: "🇰🇿", en: "Kazakhstan", ru: "Казахстан" },
+  { code: "UZB", flag: "🇺🇿", en: "Uzbekistan", ru: "Узбекистан" },
+  { code: "KOR", flag: "🇰🇷", en: "South Korea", ru: "Южная Корея" },
+  { code: "CHN", flag: "🇨🇳", en: "China", ru: "Китай" },
+  { code: "AUS", flag: "🇦🇺", en: "Australia", ru: "Австралия" },
+  { code: "NZL", flag: "🇳🇿", en: "New Zealand", ru: "Новая Зеландия" },
+  { code: "MEX", flag: "🇲🇽", en: "Mexico", ru: "Мексика" },
+  { code: "BRA", flag: "🇧🇷", en: "Brazil", ru: "Бразилия" },
+  { code: "ARG", flag: "🇦🇷", en: "Argentina", ru: "Аргентина" },
+  { code: "ISR", flag: "🇮🇱", en: "Israel", ru: "Израиль" },
+  { code: "TUR", flag: "🇹🇷", en: "Türkiye", ru: "Турция" },
+  { code: "UKR", flag: "🇺🇦", en: "Ukraine", ru: "Украина" },
+  { code: "BUL", flag: "🇧🇬", en: "Bulgaria", ru: "Болгария" },
+  { code: "ROU", flag: "🇷🇴", en: "Romania", ru: "Румыния" },
+  { code: "SLO", flag: "🇸🇮", en: "Slovenia", ru: "Словения" },
+  { code: "CRO", flag: "🇭🇷", en: "Croatia", ru: "Хорватия" },
+  { code: "SRB", flag: "🇷🇸", en: "Serbia", ru: "Сербия" },
+  { code: "GRE", flag: "🇬🇷", en: "Greece", ru: "Греция" },
+];
+
 export interface Skater {
   id: string;
   name: string;

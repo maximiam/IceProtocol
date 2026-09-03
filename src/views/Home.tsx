@@ -5,16 +5,18 @@ import type { Category, Discipline, Protocol, Segment } from "../lib/scoring";
 import { catKey, discKey, fmt, segKey } from "../lib/scoring";
 import { Chip, Reveal, SectionLabel } from "../components/ui";
 import { ProtocolSheet, RulesSheet } from "../components/sheets/InfoSheets";
-import { JudgesBoard } from "./Judges";
-import { IcBook, IcCalendar, IcChevR, IcJudge, IcMedal, IcUsers } from "../components/icons";
+import { CompSheet, SkaterPickSheet } from "../components/sheets/PickSheets";
+import { IcBook, IcCalendar, IcChevR, IcJudge, IcUsers } from "../components/icons";
 
 const pad = (n: number) => String(Math.max(0, n)).padStart(2, "0");
 
 export function Home() {
-  const { t, lang, protocols, patchDraft, setView, buzz } = useApp();
+  const { t, lang, draft, protocols, patchDraft, setView, buzz } = useApp();
   const now = useNow(1000);
   const [rulesOpen, setRulesOpen] = useState(false);
   const [sel, setSel] = useState<Protocol | null>(null);
+  const [compOpen, setCompOpen] = useState(false);
+  const [skaterOpen, setSkaterOpen] = useState(false);
   const [group, setGroup] = useState<"m" | "l" | "pairs" | "dance">("m");
   const [seg, setSeg] = useState<Segment>("sp");
   const [cat, setCat] = useState<Category>("senior");
@@ -56,11 +58,6 @@ export function Home() {
     buzz("medium");
     patchDraft({ discipline: disc, segment: seg, category: cat });
     setView("studio");
-  };
-
-  const scrollToBoard = () => {
-    buzz();
-    document.getElementById("judges-board")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   return (
@@ -149,6 +146,52 @@ export function Home() {
             ))}
           </div>
 
+          <div className="field-label">{t("comp_label")}</div>
+          <button
+            type="button"
+            className="list-row glass glass-tight"
+            style={{ width: "100%", textAlign: "left", padding: "11px 13px", marginBottom: 12 }}
+            onClick={() => { setCompOpen(true); buzz(); }}
+          >
+            <span className="qi" style={{ color: "var(--gold)", width: 32, height: 32, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", background: "var(--glass-2)", flexShrink: 0 }}>
+              <IcCalendar size={15} />
+            </span>
+            <div className="meta">
+              <b>{draft.competition || t("comp_pick")}</b>
+              <span>{t("comp_pick_sub")}</span>
+            </div>
+            <IcChevR size={15} className="opacity-40" />
+          </button>
+
+          <div className="field-label">{t("athlete")}</div>
+          <button
+            type="button"
+            className="list-row glass glass-tight"
+            style={{ width: "100%", textAlign: "left", padding: "11px 13px", marginBottom: 14 }}
+            onClick={() => { setSkaterOpen(true); buzz(); }}
+          >
+            {draft.athlete ? (
+              <>
+                <span className="flag" style={{ fontSize: 20, flexShrink: 0 }}>{draft.athlete.flag}</span>
+                <div className="meta">
+                  <b>{draft.athlete.name}</b>
+                  <span>{draft.athlete.country}</span>
+                </div>
+              </>
+            ) : (
+              <>
+                <span className="qi" style={{ color: "var(--violet)", width: 32, height: 32, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", background: "var(--glass-2)", flexShrink: 0 }}>
+                  <IcUsers size={15} />
+                </span>
+                <div className="meta">
+                  <b>{t("pick_skater")}</b>
+                  <span>{t("pick_skater_sub")}</span>
+                </div>
+              </>
+            )}
+            <IcChevR size={15} className="opacity-40" />
+          </button>
+
           <button className="btn" type="button" onClick={openStudio}>
             <IcJudge size={16} />
             {t("open_studio")}
@@ -156,35 +199,19 @@ export function Home() {
         </div>
       </Reveal>
 
-      {/* quick grid */}
+      {/* reference row */}
       <Reveal delay={110}>
-        <div style={{ marginTop: 18 }}>
-          <div className="quick-grid">
-            <button className="quick-tile glass glass-tight" type="button" onClick={() => { buzz(); setRulesOpen(true); }}>
-              <span className="qi" style={{ color: "var(--cyan)" }}><IcBook size={17} /></span>
-              <div><b>{t("quick_ref")}</b><span>{t("quick_ref_sub")}</span></div>
-            </button>
-            <button className="quick-tile glass glass-tight" type="button" onClick={() => setView("skaters")}>
-              <span className="qi" style={{ color: "var(--violet)" }}><IcUsers size={17} /></span>
-              <div><b>{t("quick_skaters")}</b><span>{t("quick_skaters_sub")}</span></div>
-            </button>
-            <button className="quick-tile glass glass-tight" type="button" onClick={() => setView("season")}>
-              <span className="qi" style={{ color: "var(--gold)" }}><IcCalendar size={17} /></span>
-              <div><b>{t("quick_season")}</b><span>{t("quick_season_sub")}</span></div>
-            </button>
-            <button className="quick-tile glass glass-tight" type="button" onClick={scrollToBoard}>
-              <span className="qi" style={{ color: "var(--mint)" }}><IcMedal size={17} /></span>
-              <div><b>{t("quick_judges")}</b><span>{t("quick_judges_sub")}</span></div>
-            </button>
+        <button className="list-row glass glass-tight" type="button" style={{ width: "100%", textAlign: "left", marginTop: 12 }} onClick={() => { buzz(); setRulesOpen(true); }}>
+          <span className="qi" style={{ color: "var(--cyan)", width: 36, height: 36, borderRadius: 11, display: "flex", alignItems: "center", justifyContent: "center", background: "var(--glass-2)", flexShrink: 0 }}>
+            <IcBook size={17} />
+          </span>
+          <div className="meta">
+            <b>{t("quick_ref")}</b>
+            <span>{t("rules_structure_sub")}</span>
           </div>
-        </div>
+          <IcChevR size={15} className="opacity-40" />
+        </button>
       </Reveal>
-
-      {/* judges leaderboard */}
-      <div id="judges-board" style={{ scrollMarginTop: 80 }}>
-        <SectionLabel>{t("nav_judges")}</SectionLabel>
-        <JudgesBoard />
-      </div>
 
       {/* stats + recent protocols */}
       <Reveal delay={60}>
@@ -218,7 +245,7 @@ export function Home() {
       ) : (
         protocols.slice(0, 4).map((p) => (
           <div key={p.id} className="list-row glass glass-tight" style={{ cursor: "pointer" }} onClick={() => setSel(p)}>
-            <div className="avatar">{(p.skater || "FS").slice(0, 1).toUpperCase()}</div>
+            <div className="avatar">{p.skaterFlag || (p.skater || "FS").slice(0, 1).toUpperCase()}</div>
             <div className="meta">
               <b>{p.skater || "—"}</b>
               <span>
@@ -234,6 +261,8 @@ export function Home() {
 
       <RulesSheet open={rulesOpen} onClose={() => setRulesOpen(false)} />
       <ProtocolSheet protocol={sel} onClose={() => setSel(null)} />
+      <CompSheet open={compOpen} onClose={() => setCompOpen(false)} />
+      <SkaterPickSheet open={skaterOpen} onClose={() => setSkaterOpen(false)} />
     </div>
   );
 }

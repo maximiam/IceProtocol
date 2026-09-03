@@ -5,10 +5,17 @@ import type { Category, Discipline, Deds, Pcs, Protocol, Segment, SkElement } fr
 import { categoryOf, computeTotals, uid } from "./lib/scoring";
 import { Telegram } from "./lib/telegram";
 
-export type View = "home" | "studio" | "skaters" | "season" | "profile";
+export type View = "home" | "studio" | "skaters" | "season" | "judges" | "profile";
+
+export interface AthleteInfo {
+  name: string;
+  country: string;
+  flag: string;
+}
 
 export interface Draft {
-  skater: string;
+  competition: string;
+  athlete: AthleteInfo | null;
   discipline: Discipline;
   segment: Segment;
   category: Category;
@@ -18,7 +25,8 @@ export interface Draft {
 }
 
 const EMPTY_DRAFT: Draft = {
-  skater: "",
+  competition: "",
+  athlete: null,
   discipline: "men",
   segment: "sp",
   category: "senior",
@@ -154,15 +162,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const p: Protocol = {
       id: uid(),
       createdAt: Date.now(),
-      skater: draft.skater.trim(),
       discipline: draft.discipline,
       segment: draft.segment,
       category: categoryOf(draft.discipline, draft.category),
+      skater: draft.athlete?.name ?? "",
+      skaterCountry: draft.athlete?.country,
+      skaterFlag: draft.athlete?.flag,
+      competition: draft.competition,
       elements: draft.elements,
       pcs: draft.pcs,
       deds: draft.deds,
       ...totals,
-    };
+    } as Protocol;
     setProtocols((ps) => [p, ...ps]);
     return p;
   }, [draft]);

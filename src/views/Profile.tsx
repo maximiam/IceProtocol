@@ -31,7 +31,7 @@ export function Profile() {
             <div className="profile-name">{name}</div>
             <div className="profile-user">{username}</div>
             <span className="badge violet" style={{ marginTop: 6, display: "inline-block" }}>
-              FS Judge · {t("nav_studio")}
+              IceProtocol · {t("nav_studio")}
             </span>
           </div>
         </div>
@@ -115,7 +115,7 @@ export function Profile() {
           <>
             {protocols.map((p) => (
               <div key={p.id} className="list-row glass glass-tight" style={{ cursor: "pointer" }} onClick={() => setSelProto(p)}>
-                <div className="avatar">{(p.skater || "FS").slice(0, 1).toUpperCase()}</div>
+                <div className="avatar">{p.skaterFlag || (p.skater || "FS").slice(0, 1).toUpperCase()}</div>
                 <div className="meta">
                   <b>{p.skater || "—"}</b>
                   <span>

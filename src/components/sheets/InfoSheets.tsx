@@ -5,6 +5,117 @@ import { catKey, discKey, elementBV, elementScore, factorGroup, fmt, goeValue, P
 import type { Skater } from "../../data/skaters";
 import { IcCheck, IcCopy, IcShare } from "../icons";
 
+/* ---- program structure reference (ISU rules, seniors & juniors) ---- */
+type L2 = { ru: string; en: string };
+const STRUCT: { title: L2; color: string; rows: { seg: L2; items: L2[] }[] }[] = [
+  {
+    title: { ru: "Мужчины · Юноши", en: "Men · Junior Men" },
+    color: "var(--cyan)",
+    rows: [
+      {
+        seg: { ru: "Короткая · 2:40", en: "Short · 2:40" },
+        items: [
+          { ru: "Соло-аксель: 2A–4A (юниоры: 2A–3A)", en: "Solo Axel: 2A–4A (juniors: 2A–3A)" },
+          { ru: "Соло: 3F или 3Lz (взрослые — также 4F/4Lz)", en: "Solo: 3F or 3Lz (seniors also 4F/4Lz)" },
+          { ru: "Каскад: 3+3 / 3+2 (взрослые — 4+2, 4+3)", en: "Combo: 3+3 / 3+2 (seniors 4+2, 4+3)" },
+          { ru: "FSSp — прыжковое вращение сидя", en: "FSSp — flying sit spin" },
+          { ru: "CCoSp (юниоры — также CSSp)", en: "CCoSp (juniors also CSSp)" },
+          { ru: "StSq — дорожка шагов", en: "StSq — step sequence" },
+        ],
+      },
+      {
+        seg: { ru: "Произвольная · 4:00 (юниоры 3:30)", en: "Free · 4:00 (juniors 3:30)" },
+        items: [
+          { ru: "До 7 прыжковых элементов, минимум один — аксель", en: "Up to 7 jump elements, at least one Axel type" },
+          { ru: "3 вращения: FSSp, CCoSp + одно на выбор", en: "3 spins: FSSp, CCoSp + one of choice" },
+          { ru: "StSq — дорожка шагов", en: "StSq — step sequence" },
+          { ru: "ChSq1 — хореографическая последовательность", en: "ChSq1 — choreo sequence" },
+        ],
+      },
+    ],
+  },
+  {
+    title: { ru: "Женщины · Девушки", en: "Ladies · Junior Ladies" },
+    color: "var(--violet)",
+    rows: [
+      {
+        seg: { ru: "Короткая · 2:40", en: "Short · 2:40" },
+        items: [
+          { ru: "Соло-аксель: 2A (юниоры) / 2A–3A (взрослые)", en: "Solo Axel: 2A (juniors) / 2A–3A (seniors)" },
+          { ru: "Соло: 3Lz или 3F", en: "Solo: 3Lz or 3F" },
+          { ru: "Каскад: 3+3 / 3+2 (взрослые — также 4+2/4+3)", en: "Combo: 3+3 / 3+2 (seniors also 4+2/4+3)" },
+          { ru: "LSp или USp — вращение стоя", en: "LSp or USp — layback / upright spin" },
+          { ru: "FSSp или FCSSp — прыжковое вращение", en: "FSSp or FCSSp — flying spin" },
+          { ru: "CCoSp — комбинированное вращение", en: "CCoSp — combination spin" },
+          { ru: "StSq — дорожка шагов", en: "StSq — step sequence" },
+        ],
+      },
+      {
+        seg: { ru: "Произвольная · 4:00 (юниоры 3:30)", en: "Free · 4:00 (juniors 3:30)" },
+        items: [
+          { ru: "До 7 прыжковых элементов", en: "Up to 7 jump elements" },
+          { ru: "3 вращения: прыжковое, LSp/USp, CCoSp", en: "3 spins: flying, LSp/USp, CCoSp" },
+          { ru: "StSq — дорожка шагов", en: "StSq — step sequence" },
+          { ru: "ChSq1 — хореографическая последовательность", en: "ChSq1 — choreo sequence" },
+        ],
+      },
+    ],
+  },
+  {
+    title: { ru: "Пары", en: "Pairs" },
+    color: "var(--gold)",
+    rows: [
+      {
+        seg: { ru: "Короткая · 2:40", en: "Short · 2:40" },
+        items: [
+          { ru: "Поддержка: группа ≤3 (юниоры) / любая (взрослые)", en: "Lift: group ≤3 (juniors) / any group (seniors)" },
+          { ru: "Твист: 2Tw–3Tw", en: "Twist: 2Tw–3Tw" },
+          { ru: "Выброс: двойной или тройной", en: "Throw: double or triple" },
+          { ru: "Соло-прыжок: 2A (юниоры) / 2A–3A (взрослые)", en: "Solo jump: 2A (juniors) / 2A–3A (seniors)" },
+          { ru: "Тодес — спираль смерти", en: "Death spiral" },
+          { ru: "PCoSp — парное комбинированное вращение", en: "PCoSp — pair combination spin" },
+          { ru: "StSq — дорожка шагов", en: "StSq — step sequence" },
+        ],
+      },
+      {
+        seg: { ru: "Произвольная · 4:00 (юниоры 3:30)", en: "Free · 4:00 (juniors 3:30)" },
+        items: [
+          { ru: "До 3 поддержек", en: "Up to 3 lifts" },
+          { ru: "1 твист", en: "1 twist" },
+          { ru: "До 2 выбросов", en: "Up to 2 throws" },
+          { ru: "Соло-прыжок + каскад или последовательность", en: "Solo jump + combination or sequence" },
+          { ru: "Тодес, PCoSp, StSq, ChSq1", en: "Death spiral, PCoSp, StSq, ChSq1" },
+        ],
+      },
+    ],
+  },
+  {
+    title: { ru: "Танцы на льду", en: "Ice Dance" },
+    color: "var(--mint)",
+    rows: [
+      {
+        seg: { ru: "Ритм-танец · 2:50 (юниоры 2:40)", en: "Rhythm · 2:50 (juniors 2:40)" },
+        items: [
+          { ru: "1–2 секции паттерна", en: "1–2 pattern sections" },
+          { ru: "Короткая поддержка (StaLi/CuLi/SlLi/RoLi/SeLi)", en: "Short lift (StaLi/CuLi/SlLi/RoLi/SeLi)" },
+          { ru: "CoSp — танцевальное вращение", en: "CoSp — dance spin" },
+          { ru: "StSq — дорожка шагов", en: "StSq — step sequence" },
+          { ru: "seqTw — твизлы (только взрослые)", en: "seqTw — twizzles (seniors only)" },
+        ],
+      },
+      {
+        seg: { ru: "Произвольный · 4:00 (юниоры 3:30)", en: "Free · 4:00 (juniors 3:30)" },
+        items: [
+          { ru: "ChLi1 + до 3 коротких поддержек (юниоры — до 2)", en: "ChLi1 + up to 3 short lifts (juniors — up to 2)" },
+          { ru: "CoSp — танцевальное вращение", en: "CoSp — dance spin" },
+          { ru: "StSq — дорожка шагов", en: "StSq — step sequence" },
+          { ru: "Одно хорео-движение: ChSl1 / ChSp1 / ChTw1", en: "One choreo movement: ChSl1 / ChSp1 / ChTw1" },
+        ],
+      },
+    ],
+  },
+];
+
 /* ================= ISU reference ================= */
 export function RulesSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { t, lang } = useApp();
@@ -17,7 +128,29 @@ export function RulesSheet({ open, onClose }: { open: boolean; onClose: () => vo
   ];
 
   return (
-    <Sheet open={open} onClose={onClose} title={t("rules_title")} sub={t("picker_sub")}>
+    <Sheet open={open} onClose={onClose} title={t("rules_title")} sub={t("rules_structure_sub")}>
+      <div className="cat-title" style={{ marginTop: 2 }}>{t("rules_structure")}</div>
+      {STRUCT.map((s) => (
+        <div key={s.title.en} className="glass glass-tight" style={{ padding: "12px 14px", marginBottom: 10 }}>
+          <b style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 15, color: s.color }}>{lang === "ru" ? s.title.ru : s.title.en}</b>
+          {s.rows.map((r) => (
+            <div key={r.seg.en} style={{ marginTop: 10 }}>
+              <span className="badge" style={{ fontSize: 10, marginBottom: 6, display: "inline-block" }}>
+                {lang === "ru" ? r.seg.ru : r.seg.en}
+              </span>
+              <ul style={{ margin: "4px 0 0", padding: 0, listStyle: "none" }}>
+                {r.items.map((it) => (
+                  <li key={it.en} style={{ display: "flex", gap: 8, alignItems: "flex-start", fontSize: 12, color: "var(--mist)", lineHeight: 1.5, padding: "2.5px 0" }}>
+                    <span style={{ width: 4, height: 4, borderRadius: "50%", background: s.color, marginTop: 6.5, flexShrink: 0 }} />
+                    {lang === "ru" ? it.ru : it.en}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      ))}
+
       <div className="cat-title">{t("rules_goe")}</div>
       <p className="sheet-sub">{t("rules_goe_sub")}</p>
       <div className="goe-scale" style={{ margin: "4px 0 8px" }}>
@@ -83,8 +216,10 @@ export function RulesSheet({ open, onClose }: { open: boolean; onClose: () => vo
 export function protocolToText(p: Protocol, lang: "ru" | "en", discLabel: string, segLabel: string, catLabel: string): string {
   const date = new Date(p.createdAt).toLocaleDateString(lang === "ru" ? "ru-RU" : "en-GB");
   const lines = [
-    `FS JUDGE — ${p.skater || (lang === "ru" ? "без имени" : "unnamed")}`,
-    `${discLabel} · ${catLabel} · ${segLabel} · ${date}`,
+    `ICEPROTOCOL — ${p.skaterFlag ? p.skaterFlag + " " : ""}${p.skater || (lang === "ru" ? "без имени" : "unnamed")}${p.skaterCountry ? ` (${p.skaterCountry})` : ""}`,
+    `${discLabel} · ${catLabel} · ${segLabel}`,
+    ...(p.competition ? [`🏆 ${p.competition}`] : []),
+    date,
     "—".repeat(28),
     ...p.elements.map((el, i) => {
       const flags = el.flags.length ? ` [${el.flags.join(" ")}]` : "";
@@ -142,11 +277,17 @@ export function ProtocolSheet({ protocol, onClose }: { protocol: Protocol | null
   };
 
   return (
-    <Sheet open={!!protocol} onClose={onClose} title={t("protocol_doc")} sub={`${protocol.skater || "—"} · ${discLabel} · ${segLabel}`}>
+    <Sheet open={!!protocol} onClose={onClose} title={t("protocol_doc")} sub={`${catLabel} · ${discLabel} · ${segLabel}`}>
       <div className="doc">
         <div className="doc-head">
-          <span>FS JUDGE · {t("doc_training")}</span>
+          <span>IceProtocol · {t("doc_training")}</span>
           <span>{date}</span>
+        </div>
+        {protocol.competition && <div style={{ fontWeight: 700, marginBottom: 2 }}>🏆 {protocol.competition}</div>}
+        <div style={{ fontWeight: 600, marginBottom: 8 }}>
+          {protocol.skaterFlag && <span>{protocol.skaterFlag} </span>}
+          {protocol.skater || "—"}
+          {protocol.skaterCountry ? ` · ${protocol.skaterCountry}` : ""}
         </div>
         <table>
           <thead>

@@ -1,8 +1,7 @@
 import React, { useMemo } from "react";
 import { useApp, type View } from "../store";
-import { Telegram } from "../lib/telegram";
 import { AnimatedNumber } from "./ui";
-import { IcBlade, IcCalendar, IcHome, IcJudge, IcSave, IcUser, IcUsers } from "./icons";
+import { IcBlade, IcCalendar, IcHome, IcJudge, IcMedal, IcSave, IcUser, IcUsers } from "./icons";
 
 /* ---------- ambient layers ---------- */
 const SPARK_COLORS = ["#6fe3ff", "#b79bff", "#7bf0c2", "#ffcf6b", "#6fe3ff"];
@@ -49,10 +48,7 @@ export function BgFx() {
 
 /* ---------- top bar ---------- */
 export function TopBar() {
-  const { t, setView, buzz } = useApp();
-  const user = Telegram.user;
-  const initials = user?.first_name?.[0] ?? "С";
-
+  const { setView } = useApp();
   return (
     <header className="topbar">
       <button className="brand" onClick={() => setView("home")} type="button">
@@ -60,42 +56,20 @@ export function TopBar() {
           <IcBlade size={20} />
         </div>
         <div className="brand-text">
-          <b>FS Judge</b>
-          <span>{t("brand_sub")}</span>
+          <b style={{ fontSize: 17.5, letterSpacing: 0.2 }}>IceProtocol</b>
         </div>
       </button>
-      <div className="top-actions">
-        <button
-          className="icon-btn"
-          type="button"
-          onClick={() => setView("profile")}
-          aria-label="profile"
-          style={{
-            background: "linear-gradient(140deg, var(--cyan), var(--violet))",
-            border: "none",
-            color: "#04202b",
-            fontFamily: "var(--font-display)",
-            fontWeight: 600,
-            fontSize: 14,
-          }}
-        >
-          {user?.photo_url ? (
-            <img src={user.photo_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 11 }} />
-          ) : (
-            initials
-          )}
-        </button>
-      </div>
     </header>
   );
 }
 
 /* ---------- tab bar ---------- */
-const TABS: { view: View; key: "nav_home" | "nav_studio" | "nav_skaters" | "nav_season" | "nav_profile"; icon: React.ReactNode }[] = [
+const TABS: { view: View; key: "nav_home" | "nav_studio" | "nav_skaters" | "nav_season" | "tab_judges" | "nav_profile"; icon: React.ReactNode }[] = [
   { view: "home", key: "nav_home", icon: <IcHome /> },
   { view: "studio", key: "nav_studio", icon: <IcJudge /> },
   { view: "skaters", key: "nav_skaters", icon: <IcUsers /> },
   { view: "season", key: "nav_season", icon: <IcCalendar /> },
+  { view: "judges", key: "tab_judges", icon: <IcMedal /> },
   { view: "profile", key: "nav_profile", icon: <IcUser /> },
 ];
 

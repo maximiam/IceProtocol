@@ -86,6 +86,13 @@ export function JudgesBoard() {
   return (
     <div>
       <Reveal>
+        <h1 className="h1">
+          {t("nav_judges")} <em>IceProtocol</em>
+        </h1>
+        <p className="sub">{t("judges_sub")}</p>
+      </Reveal>
+
+      <Reveal delay={40}>
         <div className="glass" style={{ padding: "18px 12px 10px", marginBottom: 10 }}>
           <div style={{ display: "flex", justifyContent: "center", alignItems: "flex-end", gap: 10 }}>
             {podiumOrder.map((pos) => {

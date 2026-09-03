@@ -37,6 +37,9 @@ export interface Protocol {
   id: string;
   createdAt: number;
   skater: string;
+  skaterCountry?: string;
+  skaterFlag?: string;
+  competition?: string;
   discipline: Discipline;
   segment: Segment;
   category?: Category;

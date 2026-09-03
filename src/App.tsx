@@ -4,6 +4,7 @@ import { Home } from "./views/Home";
 import { Studio } from "./views/Studio";
 import { Skaters } from "./views/Skaters";
 import { Season } from "./views/Season";
+import { JudgesBoard } from "./views/Judges";
 import { Profile } from "./views/Profile";
 
 function Toast() {
@@ -27,6 +28,7 @@ function Shell() {
           {view === "studio" && <Studio />}
           {view === "skaters" && <Skaters />}
           {view === "season" && <Season />}
+          {view === "judges" && <JudgesBoard />}
           {view === "profile" && <Profile />}
         </main>
       </div>
