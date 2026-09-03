@@ -4,12 +4,11 @@ import { Telegram } from "../lib/telegram";
 import type { Protocol } from "../lib/scoring";
 import { discKey, fmt, segKey } from "../lib/scoring";
 import { Reveal, SectionLabel, Toggle } from "../components/ui";
-import { ProtocolSheet, RulesSheet } from "../components/sheets/InfoSheets";
-import { IcBook, IcChevR, IcJudge, IcTrash } from "../components/icons";
+import { ProtocolSheet } from "../components/sheets/InfoSheets";
+import { IcChevR, IcJudge, IcTrash } from "../components/icons";
 
 export function Profile() {
   const { t, lang, theme, setTheme, setLang, haptics, setHaptics, protocols, deleteProtocol, clearProtocols, buzz, showToast, setView } = useApp();
-  const [rulesOpen, setRulesOpen] = useState(false);
   const [selProto, setSelProto] = useState<Protocol | null>(null);
   const [confirming, setConfirming] = useState(false);
 
@@ -166,7 +165,6 @@ export function Profile() {
 
       <p style={{ textAlign: "center", fontSize: 10.5, color: "var(--mist-dim)", margin: "26px 0 8px", lineHeight: 1.6 }}>{t("version")}</p>
 
-      <RulesSheet open={rulesOpen} onClose={() => setRulesOpen(false)} />
       <ProtocolSheet protocol={selProto} onClose={() => setSelProto(null)} />
     </div>
   );

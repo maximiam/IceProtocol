@@ -2,17 +2,7 @@ import React, { useMemo } from "react";
 import { useApp, type View } from "../store";
 import { Telegram } from "../lib/telegram";
 import { AnimatedNumber } from "./ui";
-import {
-  IcBlade,
-  IcCalendar,
-  IcHome,
-  IcJudge,
-  IcMoon,
-  IcSave,
-  IcSun,
-  IcUser,
-  IcUsers,
-} from "./icons";
+import { IcBlade, IcCalendar, IcHome, IcJudge, IcSave, IcUser, IcUsers } from "./icons";
 
 /* ---------- ambient layers ---------- */
 const SPARK_COLORS = ["#6fe3ff", "#b79bff", "#7bf0c2", "#ffcf6b", "#6fe3ff"];
@@ -59,7 +49,7 @@ export function BgFx() {
 
 /* ---------- top bar ---------- */
 export function TopBar() {
-  const { t, theme, setTheme, setView, buzz } = useApp();
+  const { t, setView, buzz } = useApp();
   const user = Telegram.user;
   const initials = user?.first_name?.[0] ?? "С";
 
