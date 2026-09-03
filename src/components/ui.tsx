@@ -1,6 +1,32 @@
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { IcMinus, IcPlus } from "./icons";
+import { IcChevR, IcMinus, IcPlus, IcX } from "./icons";
+
+/** Visual frame that every icon lives in */
+export function IconFrame({
+  children,
+  className = "",
+  style,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  style?: React.CSSProperties;
+}) {
+  return (
+    <span className={`icon-frame ${className}`} style={style}>
+      {children}
+    </span>
+  );
+}
+
+/** Framed chevron used across list rows */
+export function Chev() {
+  return (
+    <span className="icon-frame sm chev-f">
+      <IcChevR size={12} />
+    </span>
+  );
+}
 
 export function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
@@ -53,6 +79,9 @@ export function Sheet({
   return createPortal(
     <div className="overlay" onClick={onClose}>
       <div className="sheet" onClick={(e) => e.stopPropagation()}>
+        <button className="sheet-x icon-frame" type="button" onClick={onClose} aria-label="close">
+          <IcX size={14} />
+        </button>
         <div className="sheet-handle" />
         {title && <h3 className="sheet-title">{title}</h3>}
         {sub && <p className="sheet-sub">{sub}</p>}
@@ -144,7 +173,7 @@ export function AnimatedNumber({
 export function Empty({ icon, title, sub }: { icon: React.ReactNode; title: string; sub?: string }) {
   return (
     <div className="empty">
-      {icon}
+      <span className="icon-frame lg">{icon}</span>
       <b>{title}</b>
       {sub && <span>{sub}</span>}
     </div>
